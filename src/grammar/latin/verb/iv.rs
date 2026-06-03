@@ -1,0 +1,534 @@
+use super::*;
+
+impl VerbInstance<'_> {
+    pub(super) fn infinitive_iv(&self) -> String {
+        match self.tense {
+            Tense::Present => self.verb.infinitive.clone(),
+            _ => panic!("Not implemented"),
+        }
+    }
+
+    pub(super) fn conjugate_iv(&self) -> String {
+        let stem = self.get_stem_iv();
+        let stem_vowel = self.get_stem_vowel_iv();
+        let infix: String = self.get_infix_iv();
+        let ending: &str = self.get_ending_iv();
+
+        // println!("{stem}  {stem_vowel}  {infix}  {ending}  ");
+
+        format!("{stem}{stem_vowel}{infix}{ending}")
+    }
+
+    fn get_stem_iv(&self) -> String {
+        match self.mood {
+            Mood::Indicative => match self.tense {
+                Tense::Present | Tense::Future => self
+                    .verb
+                    .present
+                    .chars()
+                    .take(self.verb.present.chars().count() - 2)
+                    .collect(),
+                Tense::Imperfect => self
+                    .verb
+                    .present
+                    .chars()
+                    .take(self.verb.present.chars().count() - 1)
+                    .collect(),
+                Tense::Perfect => self
+                    .verb
+                    .perfect
+                    .chars()
+                    .take(self.verb.perfect.chars().count() - 1)
+                    .collect(),
+            },
+            Mood::Subjunctive => match self.tense {
+                Tense::Present => self
+                    .verb
+                    .present
+                    .chars()
+                    .take(self.verb.present.chars().count() - 1)
+                    .collect(),
+                Tense::Imperfect => self
+                    .verb
+                    .infinitive
+                    .chars()
+                    .take(self.verb.infinitive.chars().count() - 1)
+                    .collect(),
+                Tense::Perfect => self
+                    .verb
+                    .perfect
+                    .chars()
+                    .take(self.verb.perfect.chars().count() - 1)
+                    .collect(),
+                Tense::Future => panic!("There is no future subjunctive"),
+                // _ => "".to_string(),
+            },
+        }
+    }
+
+    fn get_stem_vowel_iv(&self) -> String {
+        match self.person {
+            Person::First => match self.number {
+                Number::Singular => match self.mood {
+                    Mood::Indicative => match self.tense {
+                        Tense::Present | Tense::Perfect => match self.voice {
+                            Voice::Active => "i".to_string(),
+                            Voice::Passive => "o".to_string(),
+                        },
+                        Tense::Imperfect => "ē".to_string(),
+                        Tense::Future => "a".to_string(),
+                    },
+                    Mood::Subjunctive => match self.tense {
+                        Tense::Perfect => "eri".to_string(),
+                        Tense::Imperfect => "e".to_string(),
+                        _ => "a".to_string(),
+                    },
+                },
+                Number::Plural => match self.mood {
+                    Mood::Indicative => match self.tense {
+                        Tense::Present => "ī".to_string(),
+                        Tense::Imperfect | Tense::Future => "ē".to_string(),
+                        Tense::Perfect => "i".to_string(),
+                    },
+                    Mood::Subjunctive => match self.tense {
+                        Tense::Perfect => "eri".to_string(),
+                        Tense::Imperfect => "ē".to_string(),
+                        _ => "ā".to_string(),
+                    },
+                },
+            },
+            Person::Second => match self.mood {
+                Mood::Indicative => match self.tense {
+                    Tense::Present => "ī".to_string(),
+                    Tense::Perfect => "i".to_string(),
+                    Tense::Imperfect => "ē".to_string(),
+                    Tense::Future => "ē".to_string(),
+                },
+                Mood::Subjunctive => match self.tense {
+                    Tense::Perfect => "eri".to_string(),
+                    Tense::Imperfect => "ē".to_string(),
+                    _ => "ā".to_string(),
+                },
+            },
+            Person::Third => match self.mood {
+                Mood::Indicative => match self.tense {
+                    Tense::Present => match self.voice {
+                        Voice::Active => match self.number {
+                            Number::Singular => "i".to_string(),
+                            Number::Plural => "iu".to_string(),
+                        },
+                        Voice::Passive => match self.number {
+                            Number::Singular => "i".to_string(),
+                            Number::Plural => "u".to_string(),
+                        },
+                    },
+                    Tense::Imperfect => "ē".to_string(),
+                    Tense::Future => "e".to_string(),
+                    Tense::Perfect => match self.number {
+                        Number::Singular => "i".to_string(),
+                        Number::Plural => "ēru".to_string(),
+                    },
+                },
+                Mood::Subjunctive => match self.tense {
+                    Tense::Perfect => match self.number {
+                        Number::Singular => "eri".to_string(),
+                        Number::Plural => "eri".to_string(),
+                    },
+                    Tense::Imperfect => "e".to_string(),
+                    _ => "a".to_string(),
+                },
+            },
+        }
+    }
+
+    fn get_infix_iv(&self) -> String {
+        match self.mood {
+            Mood::Indicative => match self.tense {
+                Tense::Imperfect => match (self.person, self.number) {
+                    (Person::Third, _) | (Person::First, Number::Singular) => "ba".to_string(),
+                    _ => "bā".to_string(),
+                },
+                _ => "".to_string(),
+            },
+            _ => "".to_string(),
+        }
+    }
+
+    fn get_ending_iv(&self) -> &'static str {
+        match self.person {
+            Person::First => match self.number {
+                Number::Singular => match self.mood {
+                    Mood::Indicative => match self.voice {
+                        Voice::Active => match self.tense {
+                            Tense::Present => "ō",
+                            Tense::Imperfect | Tense::Future => "m",
+                            Tense::Perfect => "ī",
+                        },
+                        Voice::Passive => "r",
+                    },
+                    Mood::Subjunctive => "m",
+                },
+                Number::Plural => match self.voice {
+                    Voice::Active => "mus",
+                    Voice::Passive => "mur",
+                },
+            },
+            Person::Second => match self.number {
+                Number::Singular => match (self.voice, self.mood) {
+                    (Voice::Active, Mood::Indicative) => match self.tense {
+                        Tense::Perfect => "stī",
+                        _ => "s",
+                    },
+                    (Voice::Passive, _) => "ris",
+                    _ => "s",
+                },
+                Number::Plural => match self.voice {
+                    Voice::Active => match (self.mood, self.tense) {
+                        (Mood::Indicative, Tense::Perfect) => "stis",
+                        _ => "tis",
+                    },
+                    Voice::Passive => "minī",
+                },
+            },
+            Person::Third => match self.number {
+                Number::Singular => match self.voice {
+                    Voice::Active => "t",
+                    Voice::Passive => "tur",
+                },
+                Number::Plural => match self.voice {
+                    Voice::Active => match (self.mood, self.tense) {
+                        (Mood::Subjunctive, Tense::Perfect) => "nt",
+                        _ => "nt",
+                    },
+                    Voice::Passive => "ntur",
+                },
+            },
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rstest::rstest;
+
+    #[test]
+    fn test_verb_iv() {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::IV,
+            present: "audiō".to_string(),
+            infinitive: "audīre".to_string(),
+            perfect: "audīvī".to_string(),
+            supine: Some("auditum".to_string()),
+        };
+
+        assert_eq!(verb.present, "audiō")
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "audiō")]
+    #[case(Person::Second, Number::Singular, "audīs")]
+    #[case(Person::Third, Number::Singular, "audit")]
+    #[case(Person::First, Number::Plural, "audīmus")]
+    #[case(Person::Second, Number::Plural, "audītis")]
+    #[case(Person::Third, Number::Plural, "audiunt")]
+    fn test_conj_pres_ind_act_iv(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::IV,
+            present: "audiō".to_string(),
+            infinitive: "audīre".to_string(),
+            perfect: "audīvī".to_string(),
+            supine: Some("auditum".to_string()),
+        };
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Present,
+            mood: Mood::Indicative,
+            voice: Voice::Active,
+        };
+
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "audiēbam")]
+    #[case(Person::Second, Number::Singular, "audiēbās")]
+    #[case(Person::Third, Number::Singular, "audiēbat")]
+    #[case(Person::First, Number::Plural, "audiēbāmus")]
+    #[case(Person::Second, Number::Plural, "audiēbātis")]
+    #[case(Person::Third, Number::Plural, "audiēbant")]
+    fn test_conj_impf_ind_act_iv(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::IV,
+            present: "audiō".to_string(),
+            infinitive: "audiere".to_string(),
+            perfect: "audīvī".to_string(),
+            supine: Some("auditum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Imperfect,
+            mood: Mood::Indicative,
+            voice: Voice::Active,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    // #[rstest]
+    // #[case(Person::First, Number::Singular, "ducor")]
+    // #[case(Person::Second, Number::Singular, "duceris")]
+    // #[case(Person::Third, Number::Singular, "ducitur")]
+    // #[case(Person::First, Number::Plural, "ducimur")]
+    // #[case(Person::Second, Number::Plural, "duciminī")]
+    // #[case(Person::Third, Number::Plural, "ducuntur")]
+    // fn test_conj_pres_ind_pass_iv(
+    //     #[case] person: Person,
+    //     #[case] number: Number,
+    //     #[case] expected: String,
+    // ) {
+    //     let verb = Verb {
+    //         id: None,
+    //         conjugation: Conjugation::IV,
+    //         present: "ducō".to_string(),
+    //         infinitive: "ducere".to_string(),
+    //         perfect: "duxī".to_string(),
+    //         supine: Some("ductum".to_string()),
+    //     };
+    //
+    //     let mut vi = VerbInstance {
+    //         verb: &verb,
+    //         person,
+    //         number,
+    //         tense: Tense::Present,
+    //         mood: Mood::Indicative,
+    //         voice: Voice::Passive,
+    //     };
+    //     let pres_ind_pass = vi.conjugate();
+    //
+    //     assert_eq!(expected, pres_ind_pass)
+    // }
+    //
+    // #[rstest]
+    // #[case(Person::First, Number::Singular, "cupior")]
+    // #[case(Person::Second, Number::Singular, "cuperis")]
+    // #[case(Person::Third, Number::Singular, "cupitur")]
+    // #[case(Person::First, Number::Plural, "cupimur")]
+    // #[case(Person::Second, Number::Plural, "cupiminī")]
+    // #[case(Person::Third, Number::Plural, "cupiuntur")]
+    // fn test_conj_pres_ind_pass_iv_i(
+    //     #[case] person: Person,
+    //     #[case] number: Number,
+    //     #[case] expected: String,
+    // ) {
+    //     let verb = Verb {
+    //         id: None,
+    //         conjugation: Conjugation::IV,
+    //         present: "cupiō".to_string(),
+    //         infinitive: "cupere".to_string(),
+    //         perfect: "cupīvī".to_string(),
+    //         supine: Some("cuptum".to_string()),
+    //     };
+    //
+    //     let mut vi = VerbInstance {
+    //         verb: &verb,
+    //         person,
+    //         number,
+    //         tense: Tense::Present,
+    //         mood: Mood::Indicative,
+    //         voice: Voice::Passive,
+    //     };
+    //     let pres_ind_pass = vi.conjugate();
+    //
+    //     assert_eq!(expected, pres_ind_pass)
+    // }
+
+    // #[rstest]
+    // #[case(Person::First, Number::Singular, "caedam")]
+    // #[case(Person::Second, Number::Singular, "caedēs")]
+    // #[case(Person::Third, Number::Singular, "caedet")]
+    // #[case(Person::First, Number::Plural, "caedēmus")]
+    // #[case(Person::Second, Number::Plural, "caedētis")]
+    // #[case(Person::Third, Number::Plural, "caedent")]
+    // fn test_conj_fut_ind_act_iv(
+    //     #[case] person: Person,
+    //     #[case] number: Number,
+    //     #[case] expected: String,
+    // ) {
+    //     let verb = Verb {
+    //         id: None,
+    //         conjugation: Conjugation::IV,
+    //         present: "caedō".to_string(),
+    //         infinitive: "caedere".to_string(),
+    //         perfect: "cecīdī".to_string(),
+    //         supine: Some("caesum".to_string()),
+    //     };
+    //
+    //     let mut vi = VerbInstance {
+    //         verb: &verb,
+    //         person,
+    //         number,
+    //         tense: Tense::Future,
+    //         mood: Mood::Indicative,
+    //         voice: Voice::Active,
+    //     };
+    //     let result = vi.conjugate();
+    //
+    //     assert_eq!(expected, result)
+    // }
+
+    // #[rstest]
+    // #[case(Person::First, Number::Singular, "amāvī")]
+    // #[case(Person::Second, Number::Singular, "amāvistī")]
+    // #[case(Person::Third, Number::Singular, "amāvit")]
+    // #[case(Person::First, Number::Plural, "amāvimus")]
+    // #[case(Person::Second, Number::Plural, "amāvistis")]
+    // #[case(Person::Third, Number::Plural, "amāvērunt")]
+    // fn test_conj_perf_ind_act(
+    //     #[case] person: Person,
+    //     #[case] number: Number,
+    //     #[case] expected: String,
+    // ) {
+    //     let verb = Verb {
+    //         id: None,
+    //         conjugation: Conjugation::IV,
+    //         present: "amō".to_string(),
+    //         infinitive: "amāre".to_string(),
+    //         perfect: "amāvī".to_string(),
+    //         supine: Some("amātum".to_string()),
+    //     };
+    //
+    //     let mut vi = VerbInstance {
+    //         verb: &verb,
+    //         person,
+    //         number,
+    //         tense: Tense::Perfect,
+    //         mood: Mood::Indicative,
+    //         voice: Voice::Active,
+    //     };
+    //     let result = vi.conjugate();
+    //
+    //     assert_eq!(expected, result)
+    // }
+
+    // #[rstest]
+    // #[case(Person::First, Number::Singular, "agam")]
+    // #[case(Person::Second, Number::Singular, "agās")]
+    // #[case(Person::Third, Number::Singular, "agat")]
+    // #[case(Person::First, Number::Plural, "agāmus")]
+    // #[case(Person::Second, Number::Plural, "agātis")]
+    // #[case(Person::Third, Number::Plural, "agant")]
+    // fn test_conj_pres_subj_act_iv(
+    //     #[case] person: Person,
+    //     #[case] number: Number,
+    //     #[case] expected: String,
+    // ) {
+    //     let verb = Verb {
+    //         id: None,
+    //         conjugation: Conjugation::IV,
+    //         present: "agō".to_string(),
+    //         infinitive: "agere".to_string(),
+    //         perfect: "ēgī".to_string(),
+    //         supine: Some("actum".to_string()),
+    //     };
+    //
+    //     let mut vi = VerbInstance {
+    //         verb: &verb,
+    //         person,
+    //         number,
+    //         tense: Tense::Present,
+    //         mood: Mood::Subjunctive,
+    //         voice: Voice::Active,
+    //     };
+    //     let result = vi.conjugate();
+    //
+    //     assert_eq!(expected, result)
+    // }
+
+    // #[rstest]
+    // #[case(Person::First, Number::Singular, "fugerem")]
+    // #[case(Person::Second, Number::Singular, "fugerēs")]
+    // #[case(Person::Third, Number::Singular, "fugeret")]
+    // #[case(Person::First, Number::Plural, "fugerēmus")]
+    // #[case(Person::Second, Number::Plural, "fugerētis")]
+    // #[case(Person::Third, Number::Plural, "fugerent")]
+    // fn test_conj_impf_subj_act(
+    //     #[case] person: Person,
+    //     #[case] number: Number,
+    //     #[case] expected: String,
+    // ) {
+    //     let verb = Verb {
+    //         id: None,
+    //         conjugation: Conjugation::IV,
+    //         present: "fugiō".to_string(),
+    //         infinitive: "fugere".to_string(),
+    //         perfect: "fūgī".to_string(),
+    //         supine: Some("fugitūrus".to_string()),
+    //     };
+    //
+    //     let mut vi = VerbInstance {
+    //         verb: &verb,
+    //         person,
+    //         number,
+    //         tense: Tense::Imperfect,
+    //         mood: Mood::Subjunctive,
+    //         voice: Voice::Active,
+    //     };
+    //     let result = vi.conjugate();
+    //
+    //     assert_eq!(expected, result)
+    // }
+
+    // #[rstest]
+    // #[case(Person::First, Number::Singular, "amāverim")]
+    // #[case(Person::Second, Number::Singular, "amāveris")]
+    // #[case(Person::Third, Number::Singular, "amāverit")]
+    // #[case(Person::First, Number::Plural, "amāverimus")]
+    // #[case(Person::Second, Number::Plural, "amāveritis")]
+    // #[case(Person::Third, Number::Plural, "amāverint")]
+    // fn test_conj_perf_subj_act(
+    //     #[case] person: Person,
+    //     #[case] number: Number,
+    //     #[case] expected: String,
+    // ) {
+    //     let verb = Verb {
+    //         id: None,
+    //         conjugation: Conjugation::IV,
+    //         present: "amō".to_string(),
+    //         infinitive: "amāre".to_string(),
+    //         perfect: "amāvī".to_string(),
+    //         supine: Some("amātum".to_string()),
+    //     };
+    //
+    //     let mut vi = VerbInstance {
+    //         verb: &verb,
+    //         person,
+    //         number,
+    //         tense: Tense::Perfect,
+    //         mood: Mood::Subjunctive,
+    //         voice: Voice::Active,
+    //     };
+    //     let result = vi.conjugate();
+    //
+    //     assert_eq!(expected, result)
+    // }
+}

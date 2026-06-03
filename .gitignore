@@ -1,0 +1,11 @@
+.env
+
+# artifacts
+/target
+
+# local
+/data/lib
+/ref/notes
+
+# ai
+AGENTS.md

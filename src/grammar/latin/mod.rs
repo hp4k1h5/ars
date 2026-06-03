@@ -1,0 +1,9 @@
+// pub mod adjective;
+pub mod noun;
+pub mod verb;
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum Number {
+    Singular,
+    Plural,
+}
