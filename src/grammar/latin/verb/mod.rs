@@ -122,13 +122,17 @@ impl VerbInstance<'_> {
     }
 
     pub fn infinitive(&self) -> String {
-        match self.verb.conjugation {
-            Conjugation::I => self.infinitive_i(),
-            Conjugation::II => self.infinitive_ii(),
-            Conjugation::III => self.infinitive_iii(),
-            Conjugation::IV => self.infinitive_iv(),
-            // Conjugation::Esse => self.infinitive_esse(),
-            _ => panic!("Not implemented"), // TODO: III, IV conjugations
+        match self.tense {
+            Tense::Present => self.verb.infinitive.clone(),
+            Tense::Perfect => {
+                self.verb
+                    .perfect
+                    .chars()
+                    .take(self.verb.perfect.chars().count() - 1)
+                    .collect::<String>()
+                    + "isse"
+            }
+            _ => panic!("Not implemented"),
         }
     }
 }

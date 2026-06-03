@@ -1,9 +1,9 @@
 use crate::grammar::latin::verb::*;
 
 impl VerbInstance<'_> {
-    fn get_stem(&self, tense: &Tense, person: &Person, number: &Number) -> String {
-        match tense {
-            Tense::Present => match (person, number) {
+    fn get_stem(&self) -> String {
+        match self.tense {
+            Tense::Present => match (self.person, self.number) {
                 (Person::First, _) | (Person::Third, Number::Plural) => "su".to_string(),
                 _ => "es".to_string(),
             },
@@ -12,25 +12,25 @@ impl VerbInstance<'_> {
         }
     }
 
-    fn get_ending(&self, person: &Person, number: &Number, tense: &Tense) -> String {
-        match person {
-            Person::First => match number {
-                Number::Singular => match tense {
+    fn get_ending(&self) -> String {
+        match self.person {
+            Person::First => match self.number {
+                Number::Singular => match self.tense {
                     Tense::Future => "ō".to_string(),
                     _ => "m".to_string(),
                 },
                 Number::Plural => "mus".to_string(),
             },
-            Person::Second => match number {
-                Number::Singular => match tense {
+            Person::Second => match self.number {
+                Number::Singular => match self.tense {
                     Tense::Present => "".to_string(),
                     _ => "s".to_string(),
                 },
                 Number::Plural => "tis".to_string(),
             },
-            Person::Third => match number {
+            Person::Third => match self.number {
                 Number::Singular => "t".to_string(),
-                Number::Plural => match tense {
+                Number::Plural => match self.tense {
                     Tense::Future => "unt".to_string(),
                     _ => "nt".to_string(),
                 },
@@ -38,20 +38,13 @@ impl VerbInstance<'_> {
         }
     }
 
-    fn get_stem_vowel(
-        &self,
-        person: &Person,
-        number: &Number,
-        tense: &Tense,
-        // voice: &Voice,
-        // mood: &Mood,
-    ) -> String {
-        match tense {
-            Tense::Imperfect => match (person, number) {
+    fn get_stem_vowel(&self) -> String {
+        match self.tense {
+            Tense::Imperfect => match (self.person, self.number) {
                 (Person::First, Number::Singular) | (Person::Third, _) => "a".to_string(),
                 _ => "ā".to_string(),
             },
-            Tense::Future => match (person, number) {
+            Tense::Future => match (self.person, self.number) {
                 (Person::First, Number::Singular) | (Person::Third, Number::Plural) => {
                     "".to_string()
                 }
@@ -62,9 +55,9 @@ impl VerbInstance<'_> {
     }
 
     pub fn conjugate_esse(&self) -> String {
-        let stem = &self.get_stem(&self.tense, &self.person, &self.number);
-        let stem_vowel = &self.get_stem_vowel(&self.person, &self.number, &self.tense);
-        let ending: &str = &self.get_ending(&self.person, &self.number, &self.tense);
+        let stem = &self.get_stem();
+        let stem_vowel = &self.get_stem_vowel();
+        let ending: &str = &self.get_ending();
 
         format!("{stem}{stem_vowel}{ending}")
     }

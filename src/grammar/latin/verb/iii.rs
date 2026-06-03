@@ -1,13 +1,6 @@
 use super::*;
 
 impl VerbInstance<'_> {
-    pub(super) fn infinitive_iii(&self) -> String {
-        match self.tense {
-            Tense::Present => self.verb.infinitive.clone(),
-            _ => panic!("Not implemented"),
-        }
-    }
-
     pub(super) fn conjugate_iii(&self) -> String {
         let stem = self.get_stem_iii();
         let stem_vowel = self.get_stem_vowel_iii();
