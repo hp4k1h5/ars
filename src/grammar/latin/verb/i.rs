@@ -6,7 +6,7 @@ impl VerbInstance<'_> {
         let stem = self.get_stem();
         let stem_vowel = self.get_stem_vowel(stem_vowel_ind, stem_vowel_sub);
         let infix: String = self.get_infix_i();
-        let ending: &str = if self.verb.is_deponent() && self.tense == Tense::Perfect {
+        let ending: &str = if self.tense == Tense::Perfect && self.voice == Voice::Passive {
             &self.handle_deponent()
         } else {
             self.get_ending()
@@ -94,7 +94,7 @@ mod tests {
     #[case(Person::First, Number::Plural, "cōnāmur")]
     #[case(Person::Second, Number::Plural, "cōnāminī")]
     #[case(Person::Third, Number::Plural, "cōnantur")]
-    fn test_conj_pres_ind_act_i_dep(
+    fn test_conj_pres_ind_act_dep_i(
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
@@ -128,7 +128,7 @@ mod tests {
     #[case(Person::First, Number::Plural, "amābāmus")]
     #[case(Person::Second, Number::Plural, "amābātis")]
     #[case(Person::Third, Number::Plural, "amābant")]
-    fn test_conj_impf_ind_act(
+    fn test_conj_impf_ind_act_i(
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
@@ -162,7 +162,7 @@ mod tests {
     #[case(Person::First, Number::Plural, "amāmur")]
     #[case(Person::Second, Number::Plural, "amāminī")]
     #[case(Person::Third, Number::Plural, "amantur")]
-    fn test_conj_pres_ind_pass(
+    fn test_conj_pres_ind_pass_i(
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
@@ -196,7 +196,7 @@ mod tests {
     #[case(Person::First, Number::Plural, "amābimus")]
     #[case(Person::Second, Number::Plural, "amābitis")]
     #[case(Person::Third, Number::Plural, "amābunt")]
-    fn test_conj_fut_ind_act(
+    fn test_conj_fut_ind_act_i(
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
@@ -230,7 +230,7 @@ mod tests {
     #[case(Person::First, Number::Plural, "amāvimus")]
     #[case(Person::Second, Number::Plural, "amāvistis")]
     #[case(Person::Third, Number::Plural, "amāvērunt")]
-    fn test_conj_perf_ind_act(
+    fn test_conj_perf_ind_act_i(
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
@@ -264,7 +264,7 @@ mod tests {
     #[case(Person::First, Number::Plural, "amēmus")]
     #[case(Person::Second, Number::Plural, "amētis")]
     #[case(Person::Third, Number::Plural, "ament")]
-    fn test_conj_pres_subj_act(
+    fn test_conj_pres_subj_act_i(
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
@@ -298,7 +298,7 @@ mod tests {
     #[case(Person::First, Number::Plural, "amārēmus")]
     #[case(Person::Second, Number::Plural, "amārētis")]
     #[case(Person::Third, Number::Plural, "amārent")]
-    fn test_conj_impf_subj_act(
+    fn test_conj_impf_subj_act_i(
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
@@ -332,7 +332,7 @@ mod tests {
     #[case(Person::First, Number::Plural, "amāverimus")]
     #[case(Person::Second, Number::Plural, "amāveritis")]
     #[case(Person::Third, Number::Plural, "amāverint")]
-    fn test_conj_perf_subj_act(
+    fn test_conj_perf_subj_act_i(
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
@@ -353,6 +353,40 @@ mod tests {
             tense: Tense::Perfect,
             mood: Mood::Subjunctive,
             voice: Voice::Active,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "amātum sum")]
+    #[case(Person::Second, Number::Singular, "amātum es")]
+    #[case(Person::Third, Number::Singular, "amātum est")]
+    #[case(Person::First, Number::Plural, "amāta sumus")]
+    #[case(Person::Second, Number::Plural, "amāta estis")]
+    #[case(Person::Third, Number::Plural, "amāta sunt")]
+    fn test_conj_perf_ind_pass_i(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::I,
+            present: "amō".to_string(),
+            infinitive: "amāre".to_string(),
+            perfect: "amāvī".to_string(),
+            supine: Some("amātum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Perfect,
+            mood: Mood::Indicative,
+            voice: Voice::Passive,
         };
         let result = vi.conjugate();
 

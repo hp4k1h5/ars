@@ -83,7 +83,7 @@ impl Verb {
             present: "sum".to_string(),
             infinitive: "esse".to_string(),
             perfect: "fuī".to_string(),
-            supine: Some("futurum".to_string()),
+            supine: Some("futūrum".to_string()),
         }
     }
 }
@@ -141,6 +141,14 @@ impl VerbInstance<'_> {
                 .chars()
                 .take(self.verb.infinitive.chars().count() - 1)
                 .collect();
+        } else if self.tense == Tense::Perfect && self.voice == Voice::Passive {
+            return self
+                .verb
+                .supine
+                .as_ref()
+                .filter(|s| !s.is_empty())
+                .cloned()
+                .unwrap_or(self.verb.perfect.to_string());
         }
 
         let deponent = self.verb.is_deponent();
@@ -181,7 +189,8 @@ impl VerbInstance<'_> {
     }
 
     fn get_stem_vowel(&self, stem_vowel_ind: &str, stem_vowel_sub: &str) -> String {
-        if self.verb.is_deponent() && self.tense == Tense::Perfect {
+        if self.tense == Tense::Perfect && (self.verb.is_deponent() || self.voice == Voice::Passive)
+        {
             return " ".to_string();
         }
         let stem_vowel = if self.mood == Mood::Subjunctive {
@@ -227,11 +236,8 @@ impl VerbInstance<'_> {
         let esse = self.verb.esse();
         let mut esse_instance = VerbInstance {
             verb: &esse,
-            person: self.person,
-            number: self.number,
             tense,
-            mood: self.mood,
-            voice: Voice::Active,
+            ..*self
         };
         println!("{}", esse_instance.conjugate());
         esse_instance.conjugate()

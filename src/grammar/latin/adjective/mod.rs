@@ -15,16 +15,12 @@ pub struct AdjectiveInstance {
     number: Number,
 }
 
-// impl AdjectiveInstance {
-//     pub(super) fn inflect(&self) -> String {
-//         let ni = NounInstance {
-//             noun: Noun {
-//                 declension:
-//             },
-//             case: self.case,
-//             number: self.number,
-//         };
-//     }
-// }
-//
-
+impl AdjectiveInstance {
+    pub(super) fn inflect(&self) -> String {
+        let ni = NounInstance {
+            noun: Noun {},
+            case: self.case,
+            number: self.number,
+        };
+    }
+}
