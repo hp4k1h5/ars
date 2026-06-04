@@ -5,7 +5,9 @@ use super::*;
 /// 3rd declension stem type
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Stem {
+    /// i-stem
     I,
+    /// consonant-stem
     Consonant,
 }
 
@@ -35,10 +37,7 @@ impl NounInstance<'_> {
                 Case::Dative => "ī".to_string(),
                 Case::Accusative => "em".to_string(),
                 Case::Ablative => match stem {
-                    Some(Stem::I) => match self.noun.gender {
-                        Gender::Neuter => "ī".to_string(),
-                        _ => "e".to_string(),
-                    },
+                    Some(Stem::I) => "ī".to_string(),
                     _ => "e".to_string(),
                 },
                 Case::Vocative => "".to_string(),
@@ -67,6 +66,7 @@ impl NounInstance<'_> {
         {
             stem = self.noun.nominative.clone();
         }
+        println!("{}  {}", stem, inflection);
         format!("{}{}", stem, inflection)
     }
 }
