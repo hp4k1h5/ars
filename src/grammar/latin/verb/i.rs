@@ -392,4 +392,38 @@ mod tests {
 
         assert_eq!(expected, result)
     }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "cōnātum sum")]
+    #[case(Person::Second, Number::Singular, "cōnātum es")]
+    #[case(Person::Third, Number::Singular, "cōnātum est")]
+    #[case(Person::First, Number::Plural, "cōnāta sumus")]
+    #[case(Person::Second, Number::Plural, "cōnāta estis")]
+    #[case(Person::Third, Number::Plural, "cōnāta sunt")]
+    fn test_conj_perf_ind_pass_i_dep(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::I,
+            present: "cōnor".to_string(),
+            infinitive: "cōnārī".to_string(),
+            perfect: "cōnātum".to_string(),
+            supine: None,
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Perfect,
+            mood: Mood::Indicative,
+            voice: Voice::Passive,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
 }

@@ -1,5 +1,6 @@
 use crate::grammar::latin::{Number, noun::*};
 
+#[allow(non_camel_case_types)]
 #[derive(Debug, PartialEq)]
 pub enum AdjDeclension {
     I_II,
@@ -15,14 +16,14 @@ pub struct Adjective {
 }
 
 pub struct AdjectiveInstance<'ad> {
-    adjective: &'ad Adjective,
-    case: Case,
-    number: Number,
-    gender: Gender,
+    pub adjective: &'ad Adjective,
+    pub case: Case,
+    pub number: Number,
+    pub gender: Gender,
 }
 
 impl<'ad> AdjectiveInstance<'ad> {
-    fn decline(&self) -> String {
+    pub fn decline(&self) -> String {
         let declension = match self.adjective.declension {
             AdjDeclension::I_II => match self.gender {
                 Gender::Feminine => Declension::I,

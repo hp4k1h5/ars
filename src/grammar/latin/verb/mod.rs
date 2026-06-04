@@ -1,4 +1,6 @@
 use crate::grammar::latin::Number;
+use crate::grammar::latin::adjective::{Adjective, AdjectiveInstance};
+use crate::grammar::latin::noun::Case;
 use crate::schema::latin_verbs::{self};
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
@@ -141,14 +143,6 @@ impl VerbInstance<'_> {
                 .chars()
                 .take(self.verb.infinitive.chars().count() - 1)
                 .collect();
-        } else if self.tense == Tense::Perfect && self.voice == Voice::Passive {
-            return self
-                .verb
-                .supine
-                .as_ref()
-                .filter(|s| !s.is_empty())
-                .cloned()
-                .unwrap_or(self.verb.perfect.to_string());
         }
 
         let deponent = self.verb.is_deponent();
@@ -159,17 +153,7 @@ impl VerbInstance<'_> {
             },
             Tense::Perfect => match self.voice {
                 Voice::Active => (self.verb.perfect.clone(), 1),
-                Voice::Passive => match deponent {
-                    false => (self.verb.perfect.clone(), 1),
-                    true => (
-                        self.verb
-                            .supine
-                            .as_ref()
-                            .unwrap_or(&self.verb.perfect)
-                            .to_string(),
-                        0,
-                    ),
-                },
+                Voice::Passive => return self.handle_supine(),
             },
         };
 
@@ -178,6 +162,31 @@ impl VerbInstance<'_> {
             .chars()
             .take(prinicpal_part.chars().count() - ch)
             .collect()
+    }
+
+    pub fn handle_supine(&self) -> String {
+        let verb = &self
+            .verb
+            .supine
+            .as_ref()
+            .filter(|s| !s.is_empty())
+            .unwrap_or(&self.verb.perfect);
+        let stem: String = verb.chars().take(verb.chars().count() - 2).collect();
+
+        let adjective = Adjective {
+            declension: super::adjective::AdjDeclension::I_II,
+            f: stem.to_owned() + "a",
+            m: stem.to_owned() + "us",
+            n: stem.to_owned() + "um",
+        };
+        let ai = AdjectiveInstance {
+            adjective: &adjective,
+            case: Case::Nominative,
+            number: self.number,
+            gender: super::noun::Gender::Neuter, // TODO: accept gender as param
+        };
+
+        ai.decline()
     }
 
     fn match_stem_vowel(&self) -> (&str, &str) {
@@ -239,7 +248,6 @@ impl VerbInstance<'_> {
             tense,
             ..*self
         };
-        println!("{}", esse_instance.conjugate());
         esse_instance.conjugate()
     }
 
