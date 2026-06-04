@@ -1,7 +1,7 @@
 use crate::grammar::latin::verb::*;
 
 impl VerbInstance<'_> {
-    fn get_stem(&self) -> String {
+    fn get_stem_esse(&self) -> String {
         match self.tense {
             Tense::Present => match (self.person, self.number) {
                 (Person::First, _) | (Person::Third, Number::Plural) => "su".to_string(),
@@ -12,7 +12,7 @@ impl VerbInstance<'_> {
         }
     }
 
-    fn get_ending(&self) -> String {
+    fn get_ending_esse(&self) -> String {
         match self.person {
             Person::First => match self.number {
                 Number::Singular => match self.tense {
@@ -38,7 +38,7 @@ impl VerbInstance<'_> {
         }
     }
 
-    fn get_stem_vowel(&self) -> String {
+    fn get_stem_vowel_esse(&self) -> String {
         match self.tense {
             Tense::Imperfect => match (self.person, self.number) {
                 (Person::First, Number::Singular) | (Person::Third, _) => "a".to_string(),
@@ -55,9 +55,9 @@ impl VerbInstance<'_> {
     }
 
     pub fn conjugate_esse(&self) -> String {
-        let stem = &self.get_stem();
-        let stem_vowel = &self.get_stem_vowel();
-        let ending: &str = &self.get_ending();
+        let stem = &self.get_stem_esse();
+        let stem_vowel = &self.get_stem_vowel_esse();
+        let ending: &str = &self.get_ending_esse();
 
         format!("{stem}{stem_vowel}{ending}")
     }

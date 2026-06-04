@@ -2,118 +2,17 @@ use super::*;
 
 impl VerbInstance<'_> {
     pub(super) fn conjugate_i(&mut self) -> String {
-        let stem = self.get_stem_i();
-        let stem_vowel = self.get_stem_vowel_i();
+        let (stem_vowel_ind, stem_vowel_sub) = self.match_stem_vowel();
+        let stem = self.get_stem();
+        let stem_vowel = self.get_stem_vowel(stem_vowel_ind, stem_vowel_sub);
         let infix: String = self.get_infix_i();
-        let ending: &str = self.get_ending_i();
-
+        let ending: &str = if self.verb.is_deponent() && self.tense == Tense::Perfect {
+            &self.handle_deponent()
+        } else {
+            self.get_ending()
+        };
+        // println!("{stem}  {stem_vowel}  {infix}  {ending}  ");
         format!("{stem}{stem_vowel}{infix}{ending}")
-    }
-
-    fn get_stem_i(&self) -> String {
-        let take_chars = if self.verb.is_deponent() { 2 } else { 1 };
-        match self.mood {
-            Mood::Indicative => match self.tense {
-                Tense::Present | Tense::Imperfect | Tense::Future => self
-                    .verb
-                    .present
-                    .chars()
-                    .take(self.verb.present.chars().count() - take_chars)
-                    .collect(),
-                Tense::Perfect => self
-                    .verb
-                    .perfect
-                    .chars()
-                    .take(self.verb.perfect.chars().count() - 1)
-                    .collect(),
-            },
-            Mood::Subjunctive => match self.tense {
-                Tense::Present => self
-                    .verb
-                    .present
-                    .chars()
-                    .take(self.verb.present.chars().count() - 1)
-                    .collect(),
-                Tense::Imperfect => self
-                    .verb
-                    .infinitive
-                    .chars()
-                    .take(self.verb.infinitive.chars().count() - 1)
-                    .collect(),
-                Tense::Perfect => self
-                    .verb
-                    .perfect
-                    .chars()
-                    .take(self.verb.perfect.chars().count() - 1)
-                    .collect(),
-                Tense::Future => "".to_string(),
-            },
-        }
-    }
-
-    fn get_stem_vowel_i(&self) -> String {
-        match self.person {
-            Person::First => match self.number {
-                Number::Singular => match self.mood {
-                    Mood::Indicative => match self.tense {
-                        Tense::Present | Tense::Perfect => match self.voice {
-                            Voice::Active => "".to_string(),
-                            Voice::Passive => "o".to_string(),
-                        },
-                        Tense::Imperfect | Tense::Future => "ā".to_string(),
-                    },
-                    Mood::Subjunctive => match self.tense {
-                        Tense::Perfect => "eri".to_string(),
-                        _ => "e".to_string(),
-                    },
-                },
-                Number::Plural => match self.mood {
-                    Mood::Indicative => match self.tense {
-                        Tense::Present | Tense::Imperfect => "ā".to_string(),
-                        Tense::Perfect => "i".to_string(),
-                        Tense::Future => "ā".to_string(),
-                    },
-                    Mood::Subjunctive => match self.tense {
-                        Tense::Perfect => "eri".to_string(),
-                        _ => "ē".to_string(),
-                    },
-                },
-            },
-            Person::Second => match self.mood {
-                Mood::Indicative => match self.tense {
-                    Tense::Perfect => "i".to_string(),
-                    _ => "ā".to_string(),
-                },
-                Mood::Subjunctive => match self.tense {
-                    Tense::Perfect => "eri".to_string(),
-                    _ => "ē".to_string(),
-                },
-            },
-            Person::Third => match self.mood {
-                Mood::Indicative => match self.tense {
-                    Tense::Present => match self.voice {
-                        Voice::Active => "a".to_string(),
-                        Voice::Passive => match self.number {
-                            Number::Singular => "ā".to_string(),
-                            Number::Plural => "a".to_string(),
-                        },
-                    },
-                    Tense::Imperfect | Tense::Future => "ā".to_string(),
-
-                    Tense::Perfect => match self.number {
-                        Number::Singular => "i".to_string(),
-                        Number::Plural => "ēru".to_string(),
-                    },
-                },
-                Mood::Subjunctive => match self.tense {
-                    Tense::Perfect => match self.number {
-                        Number::Singular => "eri".to_string(),
-                        Number::Plural => "eri".to_string(),
-                    },
-                    _ => "e".to_string(),
-                },
-            },
-        }
     }
 
     fn get_infix_i(&self) -> String {
@@ -131,60 +30,6 @@ impl VerbInstance<'_> {
                 _ => "".to_string(),
             },
             _ => "".to_string(),
-        }
-    }
-
-    fn get_ending_i(&self) -> &'static str {
-        match self.person {
-            Person::First => match self.number {
-                Number::Singular => match self.mood {
-                    Mood::Indicative => match self.voice {
-                        Voice::Active => match self.tense {
-                            Tense::Present | Tense::Future => "ō",
-                            Tense::Imperfect => "m",
-                            Tense::Perfect => "ī",
-                        },
-                        Voice::Passive => "r",
-                    },
-                    Mood::Subjunctive => "m",
-                },
-                Number::Plural => match self.voice {
-                    Voice::Active => "mus",
-                    Voice::Passive => "mur",
-                },
-            },
-            Person::Second => match self.number {
-                Number::Singular => match self.voice {
-                    Voice::Active => match self.mood {
-                        Mood::Indicative => match self.tense {
-                            Tense::Perfect => "stī",
-                            _ => "s",
-                        },
-                        _ => "s",
-                    },
-                    Voice::Passive => "ris",
-                },
-                Number::Plural => match self.voice {
-                    Voice::Active => match (self.mood, self.tense) {
-                        (Mood::Indicative, Tense::Perfect) => "stis",
-                        _ => "tis",
-                    },
-                    Voice::Passive => "minī",
-                },
-            },
-            Person::Third => match self.number {
-                Number::Singular => match self.voice {
-                    Voice::Active => "t",
-                    Voice::Passive => "tur",
-                },
-                Number::Plural => match self.voice {
-                    Voice::Active => match (self.mood, self.tense) {
-                        (Mood::Subjunctive, Tense::Perfect) => "nt",
-                        _ => "nt",
-                    },
-                    Voice::Passive => "ntur",
-                },
-            },
         }
     }
 }

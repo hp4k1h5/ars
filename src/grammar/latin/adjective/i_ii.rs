@@ -2,12 +2,12 @@
 
 use crate::grammar::latin::noun::*;
 
-impl<'a, N: Noun + 'a> Adjective<'a, N> {
-    fn decline(&self) -> String {
-        // TODO: reuse noun for declension
-        "".to_string()
-    }
-}
+// impl<'a, N: Noun + 'a> Adjective<'a, N> {
+//     fn decline(&self) -> String {
+//         // TODO: reuse noun for declension
+//         "".to_string()
+//     }
+// }
 
 #[cfg(test)]
 mod test_adjective {

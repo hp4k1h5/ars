@@ -84,14 +84,20 @@ pub struct ConjugationResult {
 }
 
 pub fn infinitive_verb(verb: &Verb, params: &ConjugationQuery) -> Vec<ConjugationResult> {
-    let tenses = get_tenses(params);
-    let voices = get_voices(params);
+    let mut tenses = get_tenses(params);
+    // Remove Imperfect
+    tenses.retain(|&t| t != Tense::Imperfect);
+
+    let mut voices = get_voices(params);
+    if verb.is_deponent() {
+        voices.retain(|&t| t != Voice::Passive);
+    }
 
     // Generate all combinations
     let mut results = Vec::new();
     for tense in &tenses {
         for voice in &voices {
-            let instance = VerbInstance {
+            let mut instance = VerbInstance {
                 verb,
                 person: Person::First,
                 number: Number::Singular,
@@ -100,7 +106,7 @@ pub fn infinitive_verb(verb: &Verb, params: &ConjugationQuery) -> Vec<Conjugatio
                 voice: *voice,
             };
 
-            let conjugated = instance.infinitive();
+            let conjugated = &instance.infinitive();
 
             results.push(ConjugationResult {
                 person: None,
@@ -108,7 +114,7 @@ pub fn infinitive_verb(verb: &Verb, params: &ConjugationQuery) -> Vec<Conjugatio
                 tense: format!("{:?}", tense),
                 mood: None,
                 voice: format!("{:?}", voice),
-                conjugated,
+                conjugated: conjugated.to_string(),
                 infinitive: Some(true),
             });
         }
@@ -149,7 +155,12 @@ pub async fn conjugate_verb(
     };
 
     let tenses = get_tenses(&params);
-    let voices = get_voices(&params);
+
+    let mut voices = get_voices(&params);
+    if verb.is_deponent() {
+        voices.retain(|&t| t != Voice::Passive);
+    }
+
     let inf = params.infinitive.unwrap_or(false);
 
     let mut results = Vec::new();
@@ -215,9 +226,9 @@ fn get_tenses(params: &ConjugationQuery) -> Vec<grammar::latin::verb::Tense> {
         Some("perfect") => vec![Tense::Perfect],
         None | _ => vec![
             Tense::Present,
-            Tense::Imperfect,
             Tense::Future,
             Tense::Perfect,
+            Tense::Imperfect,
         ],
     }
 }

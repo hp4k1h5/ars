@@ -7,8 +7,6 @@ impl VerbInstance<'_> {
         let infix: String = self.get_infix_iii();
         let ending: &str = self.get_ending_iii();
 
-        dbg!("{stem}  {stem_vowel}  {infix}  {ending}  ");
-
         format!("{stem}{stem_vowel}{infix}{ending}")
     }
 
@@ -19,6 +17,7 @@ impl VerbInstance<'_> {
             || self.tense == Tense::Imperfect
             || (self.person == Person::First && self.number == Number::Singular)
             || (self.person == Person::Third && self.number == Number::Plural)
+            || !self.verb.is_deponent()
         {
             1
         } else {

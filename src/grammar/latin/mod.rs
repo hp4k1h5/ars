@@ -1,4 +1,5 @@
 // pub mod adjective;
+pub mod adjective;
 pub mod noun;
 pub mod verb;
 
