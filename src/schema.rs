@@ -2,6 +2,10 @@
 
 pub mod sql_types {
     #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "adj_declension"))]
+    pub struct AdjDeclension;
+
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "conjugation"))]
     pub struct Conjugation;
 
@@ -17,6 +21,19 @@ pub mod sql_types {
 diesel::define_sql_function! {
     /// Maps the PostgreSQL unaccent extension.
     fn unaccent(input: diesel::sql_types::Text) -> diesel::sql_types::Text;
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::AdjDeclension;
+
+    latin_adjectives (id) {
+        id -> Uuid,
+        declension -> AdjDeclension,
+        f -> Varchar,
+        m -> Varchar,
+        n -> Varchar,
+    }
 }
 
 diesel::table! {
@@ -47,4 +64,4 @@ diesel::table! {
     }
 }
 
-diesel::allow_tables_to_appear_in_same_query!(latin_nouns, latin_verbs,);
+diesel::allow_tables_to_appear_in_same_query!(latin_adjectives, latin_nouns, latin_verbs,);

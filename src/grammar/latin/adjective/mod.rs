@@ -1,14 +1,41 @@
-use crate::grammar::latin::{Number, noun::*};
+use crate::{
+    grammar::latin::{
+        Number,
+        noun::{Case, Declension, Gender, Noun, NounInstance},
+    },
+    schema::latin_adjectives,
+};
+use diesel::prelude::*;
+use diesel_derive_enum::DbEnum;
+// use serde::Deserialize;
+use uuid::Uuid;
 
 #[allow(non_camel_case_types)]
-#[derive(Debug, PartialEq)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, Copy, PartialEq, DbEnum)]
+#[ExistingTypePath = "crate::schema::sql_types::AdjDeclension"]
 pub enum AdjDeclension {
+    #[db_rename = "I_II"]
     I_II,
+    #[db_rename = "III"]
     III,
 }
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize, Clone, Queryable, Selectable, PartialEq)]
+#[diesel(table_name = latin_adjectives)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Adjective {
+    #[diesel(deserialize_as = Uuid)]
+    pub id: Option<Uuid>,
+    pub declension: AdjDeclension,
+    pub f: String,
+    pub m: String,
+    pub n: String,
+}
+
+/// Owned version for CSV deserialization
+#[derive(Insertable, Debug, serde::Deserialize)]
+#[diesel(table_name= latin_adjectives)]
+pub struct NewAdjective {
     pub declension: AdjDeclension,
     pub f: String,
     pub m: String,
@@ -83,6 +110,7 @@ mod tests {
     #[test]
     fn test_noun_i() {
         let adj = Adjective {
+            id: None,
             declension: AdjDeclension::I_II,
             f: "nova".to_string(),
             m: "novus".to_string(),
@@ -108,6 +136,7 @@ mod tests {
     #[case(Case::Vocative, Number::Plural, "novae")]
     fn test_decline_adj_i_f(#[case] case: Case, #[case] number: Number, #[case] expected: String) {
         let adj = Adjective {
+            id: None,
             declension: AdjDeclension::I_II,
             f: "nova".to_string(),
             m: "novus".to_string(),
@@ -137,6 +166,7 @@ mod tests {
     #[case(Case::Vocative, Number::Plural, "novī")]
     fn test_decline_adj_ii_m(#[case] case: Case, #[case] number: Number, #[case] expected: String) {
         let adj = Adjective {
+            id: None,
             declension: AdjDeclension::I_II,
             f: "nova".to_string(),
             m: "novus".to_string(),
@@ -166,6 +196,7 @@ mod tests {
     #[case(Case::Vocative, Number::Plural, "nova")]
     fn test_decline_adj_ii_n(#[case] case: Case, #[case] number: Number, #[case] expected: String) {
         let adj = Adjective {
+            id: None,
             declension: AdjDeclension::I_II,
             f: "nova".to_string(),
             m: "novus".to_string(),
@@ -199,6 +230,7 @@ mod tests {
         #[case] expected: String,
     ) {
         let adj = Adjective {
+            id: None,
             declension: AdjDeclension::III,
             f: "omnis".to_string(),
             m: "omnis".to_string(),

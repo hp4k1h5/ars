@@ -1,11 +1,11 @@
-use ars::api::latin::create_latin_noun;
-use ars::{establish_cnx, grammar::latin::noun::NewNoun};
+use ars::api::latin::create_latin_adjective;
+use ars::{establish_cnx, grammar::latin::adjective::NewAdjective};
 use std::error::Error;
 
 #[derive(Debug)]
-struct NounError {
+struct AdjectiveError {
     line_number: usize,
-    noun_data: Option<NewNoun>,
+    adj_data: Option<NewAdjective>,
     error: String,
 }
 
@@ -14,45 +14,43 @@ fn main() -> Result<(), Box<dyn Error>> {
     let csv_path = if args.len() > 1 {
         &args[1]
     } else {
-        "./data/latin/latin-nouns.csv"
+        "./data/latin/latin-adjectives.csv"
     };
-
-    let mut cnx = establish_cnx();
     let mut rdr = csv::Reader::from_path(csv_path)?;
 
+    let mut cnx = establish_cnx();
     let mut successful_writes: Vec<String> = Vec::new();
-    let mut errors: Vec<NounError> = Vec::new();
-
-    for (line_number, result) in rdr.deserialize::<NewNoun>().enumerate() {
+    let mut errors: Vec<AdjectiveError> = Vec::new();
+    for (line_number, result) in rdr.deserialize::<NewAdjective>().enumerate() {
         match result {
-            Ok(new_noun) => {
-                match create_latin_noun(
+            Ok(new_adj) => {
+                match create_latin_adjective(
                     &mut cnx,
-                    &new_noun.declension,
-                    &new_noun.nominative,
-                    &new_noun.genitive,
-                    &new_noun.gender,
+                    &new_adj.declension,
+                    &new_adj.f,
+                    &new_adj.m,
+                    &new_adj.n,
                 ) {
-                    Ok(noun) => {
+                    Ok(adj) => {
                         successful_writes.push(format!(
                             "{} ({:?})",
-                            noun.nominative,
-                            Ok::<Option<uuid::Uuid>, ()>(noun.id)
+                            adj.n,
+                            Ok::<Option<uuid::Uuid>, ()>(adj.id)
                         ));
                     }
                     Err(e) => {
-                        errors.push(NounError {
+                        errors.push(AdjectiveError {
                             line_number,
-                            noun_data: Some(new_noun),
+                            adj_data: Some(new_adj),
                             error: format!("Database error: {}", e),
                         });
                     }
                 }
             }
             Err(e) => {
-                errors.push(NounError {
+                errors.push(AdjectiveError {
                     line_number,
-                    noun_data: None,
+                    adj_data: None,
                     error: format!("CSV parsing error: {}", e),
                 });
             }
@@ -65,26 +63,23 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("{}", "=".repeat(80));
 
     println!(
-        "\n✓ Successfully imported {} nouns:",
+        "\n✓ Successfully imported {} adjectives:",
         successful_writes.len()
     );
     if !successful_writes.is_empty() {
-        for (i, noun) in successful_writes.iter().enumerate() {
-            println!("  {}. {}", i + 1, noun);
+        for (i, adj) in successful_writes.iter().enumerate() {
+            println!("  {}. {}", i + 1, adj);
         }
     }
 
     if !errors.is_empty() {
-        println!("\n✗ Failed to import {} nouns:", errors.len());
+        println!("\n✗ Failed to import {} adjectives:", errors.len());
         for err in &errors {
             println!("\n  Line {}: {}", err.line_number, err.error);
-            if let Some(noun_data) = &err.noun_data {
+            if let Some(adj_data) = &err.adj_data {
                 println!(
-                    "    Data: declension={:?}, nominative={}, genitive={}, gender={:?}",
-                    noun_data.declension,
-                    noun_data.nominative,
-                    noun_data.genitive,
-                    noun_data.gender,
+                    "    Data: declension={:?}, f={}, m={}, n={:?}",
+                    adj_data.declension, adj_data.f, adj_data.m, adj_data.n,
                 );
             }
         }
@@ -101,7 +96,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Return error if any imports failed
     if !errors.is_empty() {
-        eprintln!("\nWarning: Some nouns failed to import.");
+        eprintln!("\nWarning: Some ajectives failed to import.");
         std::process::exit(1);
     }
 

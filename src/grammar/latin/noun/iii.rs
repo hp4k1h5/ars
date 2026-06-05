@@ -22,7 +22,6 @@ impl NounInstance<'_> {
 
     pub(super) fn inflect_iii(&self) -> String {
         let i_stem_nouns: Vec<&str> = vec!["mare", "nox"]; // TODO: improve
-        let adjs: Vec<&str> = vec!["omnis", "omne"];
         let stem = if self.noun.nominative == self.noun.genitive
             || i_stem_nouns.contains(&self.noun.nominative.as_str())
         {

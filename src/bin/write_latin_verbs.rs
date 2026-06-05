@@ -14,7 +14,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let csv_path = if args.len() > 1 {
         &args[1]
     } else {
-        "./data/latin-verbs.csv"
+        "./data/latin/latin-verbs.csv"
     };
 
     let mut cnx = establish_cnx();

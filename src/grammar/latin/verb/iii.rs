@@ -2,11 +2,12 @@ use super::*;
 
 impl VerbInstance<'_> {
     pub(super) fn conjugate_iii(&self) -> String {
-        let stem = self.get_stem_iii();
         let stem_vowel = self.get_stem_vowel_iii();
+        let stem = self.get_stem_iii();
         let infix: String = self.get_infix_iii();
-        let ending: &str = self.get_ending_iii();
+        let ending: &str = self.get_ending();
 
+        // println!("{stem}  {stem_vowel}  {infix}  {ending}");
         format!("{stem}{stem_vowel}{infix}{ending}")
     }
 
@@ -14,15 +15,16 @@ impl VerbInstance<'_> {
         // Handle i_stem formation
         let i_stem = self.verb.present.chars().rev().nth(1) == Some('i');
         let stem_chars_rm = if !i_stem
-            || self.tense == Tense::Imperfect
-            || (self.person == Person::First && self.number == Number::Singular)
-            || (self.person == Person::Third && self.number == Number::Plural)
-            || !self.verb.is_deponent()
+            || (self.verb.is_deponent()
+                || self.tense == Tense::Imperfect
+                || (self.person == Person::First && self.number == Number::Singular)
+                || (self.person == Person::Third && self.number == Number::Plural))
         {
             1
         } else {
             2
         };
+        // println!("ISTEM {i_stem} {stem_chars_rm}");
 
         match self.mood {
             Mood::Indicative => match self.tense {
@@ -69,10 +71,7 @@ impl VerbInstance<'_> {
             Person::First => match self.number {
                 Number::Singular => match self.mood {
                     Mood::Indicative => match self.tense {
-                        Tense::Present | Tense::Perfect => match self.voice {
-                            Voice::Active => "".to_string(),
-                            Voice::Passive => "o".to_string(),
-                        },
+                        Tense::Present | Tense::Perfect => "".to_string(),
                         Tense::Imperfect => "ē".to_string(),
                         Tense::Future => "a".to_string(),
                     },
@@ -152,58 +151,6 @@ impl VerbInstance<'_> {
                 _ => "".to_string(),
             },
             _ => "".to_string(),
-        }
-    }
-
-    fn get_ending_iii(&self) -> &'static str {
-        match self.person {
-            Person::First => match self.number {
-                Number::Singular => match self.mood {
-                    Mood::Indicative => match self.voice {
-                        Voice::Active => match self.tense {
-                            Tense::Present => "ō",
-                            Tense::Imperfect | Tense::Future => "m",
-                            Tense::Perfect => "ī",
-                        },
-                        Voice::Passive => "r",
-                    },
-                    Mood::Subjunctive => "m",
-                },
-                Number::Plural => match self.voice {
-                    Voice::Active => "mus",
-                    Voice::Passive => "mur",
-                },
-            },
-            Person::Second => match self.number {
-                Number::Singular => match (self.voice, self.mood) {
-                    (Voice::Active, Mood::Indicative) => match self.tense {
-                        Tense::Perfect => "stī",
-                        _ => "s",
-                    },
-                    (Voice::Passive, _) => "ris",
-                    _ => "s",
-                },
-                Number::Plural => match self.voice {
-                    Voice::Active => match (self.mood, self.tense) {
-                        (Mood::Indicative, Tense::Perfect) => "stis",
-                        _ => "tis",
-                    },
-                    Voice::Passive => "minī",
-                },
-            },
-            Person::Third => match self.number {
-                Number::Singular => match self.voice {
-                    Voice::Active => "t",
-                    Voice::Passive => "tur",
-                },
-                Number::Plural => match self.voice {
-                    Voice::Active => match (self.mood, self.tense) {
-                        (Mood::Subjunctive, Tense::Perfect) => "nt",
-                        _ => "nt",
-                    },
-                    Voice::Passive => "ntur",
-                },
-            },
         }
     }
 }

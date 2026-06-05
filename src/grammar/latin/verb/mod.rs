@@ -193,6 +193,7 @@ impl VerbInstance<'_> {
         let stem: String = verb.chars().take(verb.chars().count() - 2).collect();
 
         let adjective = Adjective {
+            id: None,
             declension: super::adjective::AdjDeclension::I_II,
             f: stem.to_owned() + "a",
             m: stem.to_owned() + "us",
@@ -212,6 +213,7 @@ impl VerbInstance<'_> {
         match self.verb.conjugation {
             Conjugation::I => ("ā", "ē"),
             Conjugation::II => ("ē", "ā"),
+            Conjugation::III => ("i", "ā"),
             _ => ("", ""),
         }
     }
@@ -300,7 +302,10 @@ impl VerbInstance<'_> {
                                 Conjugation::II => "eō",
                                 _ => "ō",
                             },
-                            Tense::Future => "ō",
+                            Tense::Future => match self.verb.conjugation {
+                                Conjugation::III | Conjugation::IV => "m",
+                                _ => "ō",
+                            },
                             Tense::Imperfect => "m",
                             Tense::Perfect => "",
                         },

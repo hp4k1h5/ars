@@ -1,7 +1,8 @@
+use crate::grammar::latin::adjective::{AdjDeclension, Adjective, NewAdjective};
 use crate::grammar::latin::noun::{Declension, Gender};
 use crate::grammar::latin::noun::{NewNoun, Noun};
 use crate::grammar::latin::verb::{Conjugation, NewVerb, Verb};
-use crate::schema::latin_nouns;
+use crate::schema::{latin_adjectives, latin_nouns};
 
 use diesel::prelude::SelectableHelper;
 use diesel::{PgConnection, RunQueryDsl};
@@ -26,6 +27,26 @@ pub fn create_latin_noun(
     diesel::insert_into(latin_nouns::table)
         .values(&new_noun)
         .returning(Noun::as_returning())
+        .get_result(cnx)
+}
+
+pub fn create_latin_adjective(
+    cnx: &mut PgConnection,
+    decl: &AdjDeclension,
+    f: &str,
+    m: &str,
+    n: &str,
+) -> Result<Adjective, diesel::result::Error> {
+    let new_adj = NewAdjective {
+        declension: *decl,
+        f: f.to_string(),
+        m: m.to_string(),
+        n: n.to_string(),
+    };
+
+    diesel::insert_into(latin_adjectives::table)
+        .values(&new_adj)
+        .returning(Adjective::as_returning())
         .get_result(cnx)
 }
 
