@@ -61,7 +61,17 @@ impl<'ad> AdjectiveInstance<'ad> {
             case: self.case,
             number: self.number,
         };
-        ni.decline()
+
+        let mut nid = ni.decline();
+        // Handle adjectival abl.s. w/o changing NounInstance.decline
+        match (noun.declension, self.case, self.number) {
+            (Declension::III, Case::Ablative, Number::Singular) => {
+                nid.pop();
+                nid.push('ī');
+                nid
+            }
+            _ => nid,
+        }
     }
 }
 

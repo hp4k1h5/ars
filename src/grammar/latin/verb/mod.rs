@@ -121,13 +121,25 @@ pub struct VerbInstance<'a> {
 }
 
 impl VerbInstance<'_> {
+    pub(super) fn conjugate_t(&mut self) -> String {
+        let (stem_vowel_ind, stem_vowel_sub) = self.match_stem_vowel();
+        let stem = self.get_stem();
+        let stem_vowel = self.get_stem_vowel(stem_vowel_ind, stem_vowel_sub);
+        let infix: String = self.get_infix();
+        let ending: &str = if self.tense == Tense::Perfect && self.voice == Voice::Passive {
+            &self.handle_deponent()
+        } else {
+            self.get_ending()
+        };
+        println!("{stem}  {stem_vowel}  {infix}  {ending}  ");
+        format!("{stem}{stem_vowel}{infix}{ending}")
+    }
     pub fn conjugate(&mut self) -> String {
         if self.verb.is_deponent() {
             self.voice = Voice::Passive
         }
         match self.verb.conjugation {
-            Conjugation::I => self.conjugate_i(),
-            Conjugation::II => self.conjugate_ii(),
+            Conjugation::I | Conjugation::II => self.conjugate_t(),
             Conjugation::III => self.conjugate_iii(),
             Conjugation::IV => self.conjugate_iv(),
             Conjugation::Esse => self.conjugate_esse(),
@@ -148,7 +160,14 @@ impl VerbInstance<'_> {
         let deponent = self.verb.is_deponent();
         let (prinicpal_part, ch) = match self.tense {
             Tense::Present | Tense::Imperfect | Tense::Future => match deponent {
-                false => (self.verb.present.clone(), 1),
+                false => (
+                    self.verb.present.clone(),
+                    match self.verb.conjugation {
+                        Conjugation::I => 1,
+                        Conjugation::II => 2,
+                        _ => 2,
+                    },
+                ),
                 true => (self.verb.present.clone(), 2),
             },
             Tense::Perfect => match self.voice {
@@ -236,6 +255,25 @@ impl VerbInstance<'_> {
             },
         }
     }
+
+    fn get_infix(&self) -> String {
+        match self.mood {
+            Mood::Subjunctive => "".to_string(),
+            _ => match self.tense {
+                Tense::Imperfect => match (self.person, self.number) {
+                    (Person::Third, _) | (Person::First, Number::Singular) => "ba".to_string(),
+                    _ => "bā".to_string(),
+                },
+                Tense::Future => match (self.person, self.number) {
+                    (Person::First, Number::Singular) => "b".to_string(),
+                    (Person::Third, Number::Plural) => "bu".to_string(),
+                    _ => "bi".to_string(),
+                },
+                _ => "".to_string(),
+            },
+        }
+    }
+
     fn handle_deponent(&self) -> String {
         let tense = match self.tense {
             Tense::Perfect => Tense::Present,
@@ -257,7 +295,12 @@ impl VerbInstance<'_> {
                 Number::Singular => match self.mood {
                     Mood::Indicative => match self.voice {
                         Voice::Active => match self.tense {
-                            Tense::Present | Tense::Future => "ō",
+                            Tense::Present => match self.verb.conjugation {
+                                Conjugation::I => "ō",
+                                Conjugation::II => "eō",
+                                _ => "ō",
+                            },
+                            Tense::Future => "ō",
                             Tense::Imperfect => "m",
                             Tense::Perfect => "",
                         },

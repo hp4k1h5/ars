@@ -1,39 +1,5 @@
 use super::*;
 
-impl VerbInstance<'_> {
-    pub(super) fn conjugate_i(&mut self) -> String {
-        let (stem_vowel_ind, stem_vowel_sub) = self.match_stem_vowel();
-        let stem = self.get_stem();
-        let stem_vowel = self.get_stem_vowel(stem_vowel_ind, stem_vowel_sub);
-        let infix: String = self.get_infix_i();
-        let ending: &str = if self.tense == Tense::Perfect && self.voice == Voice::Passive {
-            &self.handle_deponent()
-        } else {
-            self.get_ending()
-        };
-        // println!("{stem}  {stem_vowel}  {infix}  {ending}  ");
-        format!("{stem}{stem_vowel}{infix}{ending}")
-    }
-
-    fn get_infix_i(&self) -> String {
-        match self.mood {
-            Mood::Indicative => match self.tense {
-                Tense::Imperfect => match (self.person, self.number) {
-                    (Person::Third, _) | (Person::First, Number::Singular) => "ba".to_string(),
-                    _ => "bā".to_string(),
-                },
-                Tense::Future => match (self.person, self.number) {
-                    (Person::First, Number::Singular) => "b".to_string(),
-                    (Person::Third, Number::Plural) => "bu".to_string(),
-                    _ => "bi".to_string(),
-                },
-                _ => "".to_string(),
-            },
-            _ => "".to_string(),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

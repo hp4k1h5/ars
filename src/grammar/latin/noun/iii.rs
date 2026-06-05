@@ -22,6 +22,7 @@ impl NounInstance<'_> {
 
     pub(super) fn inflect_iii(&self) -> String {
         let i_stem_nouns: Vec<&str> = vec!["mare", "nox"]; // TODO: improve
+        let adjs: Vec<&str> = vec!["omnis", "omne"];
         let stem = if self.noun.nominative == self.noun.genitive
             || i_stem_nouns.contains(&self.noun.nominative.as_str())
         {
@@ -37,7 +38,10 @@ impl NounInstance<'_> {
                 Case::Dative => "ī".to_string(),
                 Case::Accusative => "em".to_string(),
                 Case::Ablative => match stem {
-                    Some(Stem::I) => "ī".to_string(),
+                    Some(Stem::I) => match self.noun.gender {
+                        Gender::Neuter => "ī".to_string(),
+                        _ => "e".to_string(),
+                    },
                     _ => "e".to_string(),
                 },
                 Case::Vocative => "".to_string(),
