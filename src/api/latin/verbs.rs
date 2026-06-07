@@ -1,5 +1,5 @@
 use crate::{
-    api::app::AppState,
+    api::{app::AppState, unaccent},
     establish_cnx,
     grammar::{
         self,
@@ -8,7 +8,7 @@ use crate::{
             verb::{Mood, Person, Tense, Verb, VerbInstance, Voice},
         },
     },
-    schema::{latin_verbs, unaccent},
+    schema::latin_verbs,
 };
 use axum::{
     extract::{Path, Query, State},
@@ -150,7 +150,7 @@ pub async fn conjugate_verb(
     let moods = match params.mood.as_ref().map(|c| c.to_lowercase()).as_deref() {
         Some("indicative") => vec![Mood::Indicative],
         Some("subjunctive") => vec![Mood::Subjunctive],
-        None => vec![Mood::Indicative, Mood::Subjunctive],
+        None => vec![Mood::Indicative, Mood::Subjunctive, Mood::Imperative],
         _ => return Err(StatusCode::BAD_REQUEST),
     };
 
@@ -177,6 +177,9 @@ pub async fn conjugate_verb(
             for tense in &tenses {
                 for mood in &moods {
                     if mood == &Mood::Subjunctive && tense == &Tense::Future {
+                        continue;
+                    }
+                    if mood == &Mood::Imperative && person != &Person::Second {
                         continue;
                     }
                     for voice in &voices {
@@ -224,11 +227,15 @@ fn get_tenses(params: &ConjugationQuery) -> Vec<grammar::latin::verb::Tense> {
         Some("imperfect") => vec![Tense::Imperfect],
         Some("future") => vec![Tense::Future],
         Some("perfect") => vec![Tense::Perfect],
-        None | _ => vec![
+        Some("pluperfect") => vec![Tense::Pluperfect],
+        Some("futureperfect") => vec![Tense::FuturePerfect],
+        _ => vec![
             Tense::Present,
             Tense::Future,
             Tense::Perfect,
             Tense::Imperfect,
+            Tense::Pluperfect,
+            Tense::FuturePerfect,
         ],
     }
 }

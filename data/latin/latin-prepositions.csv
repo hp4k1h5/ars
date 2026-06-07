@@ -1,44 +1,45 @@
-preposition,before_vowel,definition,with_accusative,with_ablative
-ad,,"to(ward), till",true,
-adversus,,against,true,
-adversum,,toward,true,
-ante,,before,true,
-apud,,"at, by, near",true,
-circā,,around,true,
-circum,,around,true,
-circiter,,about,true,
-contrā,,against,true,
-erga,,toward,true,
-extrā,,outside of,true,
-infra,,below,true,
-inter,,between,true,
-intra,,"within, inside",true,
-iuxta,,near,true,
-ob,,"on trueount of, in front of",true,
-penes,,"belonging to,in the power of",true,
-per,,"through, by",true
-pone,,behind,true,
-post,,"behind, after",true,
-praeter,,"besides, except",true,
-prope,,near,true,
-propter,,on account of,true,
-secundum,,"according to, next to",true,
-suprā,,"above,beyond, over",true,
-trans,,"beyond, across, over",true,
-ultra,,"beyond, more than",true,
-versus,,toward,true,
-ā,ab,"from, by (agent)",,true
-abs,,"from, by (agent)",,true
-absque,,without,,true
-coram,,in the presence of,,true
-cum,,with,,true
-de,,"(down)from, concerning",,true
-ē,ex,"outof, from, because of",,true
-prae,,"before, in front",,true
-prō,,for,,true
-sine,,without,,true
-tenus,,"up to,as far as",,true
-in,,"in, into",true,true
-sub,,"under, beneath",true,true
-subter,,under,true,true
-super,,over,true,true
+word,cases
+abs,abl.
+absque,abl.
+ad,acc.
+adversum,acc.
+adversus,acc.
+ante,acc.
+apud,acc.
+circiter,acc.
+circum,acc.
+circā,acc.
+contrā,acc.
+coram,abl.
+cum,abl.
+de,abl.
+erga,acc.
+extrā,acc.
+in,"acc.; abl."
+infra,acc.
+instar,gen.
+inter,acc.
+intra,acc.
+iuxta,acc.
+ob,acc.
+penes,acc.
+per,acc.
+pone,acc.
+post,acc.
+prae,abl.
+praeter,acc.
+prope,acc.
+propter,acc.
+prō,abl.
+secundum,acc.
+sine,abl.
+sub,"acc.; abl."
+subter,"acc.; abl."
+super,"acc.; abl."
+suprā,acc.
+tenus,"abl.; gen."
+trans,acc.
+ultra,acc.
+versus,acc.
+ā,abl.
+ē,abl.

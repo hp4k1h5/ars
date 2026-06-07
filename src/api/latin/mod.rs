@@ -1,6 +1,5 @@
 use crate::grammar::latin::adjective::{AdjDeclension, Adjective, NewAdjective};
-use crate::grammar::latin::noun::{Declension, Gender};
-use crate::grammar::latin::noun::{NewNoun, Noun};
+use crate::grammar::latin::noun::{Declension, Gender, NewNoun, Noun};
 use crate::grammar::latin::verb::{Conjugation, NewVerb, Verb};
 use crate::schema::{latin_adjectives, latin_nouns};
 
@@ -8,7 +7,10 @@ use diesel::prelude::SelectableHelper;
 use diesel::{PgConnection, RunQueryDsl};
 
 pub mod nouns;
+pub mod prepositions;
 pub mod verbs;
+
+pub use prepositions::create_latin_preposition;
 
 pub fn create_latin_noun(
     cnx: &mut PgConnection,

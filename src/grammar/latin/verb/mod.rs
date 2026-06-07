@@ -223,7 +223,8 @@ impl VerbInstance<'_> {
     }
 
     fn get_stem_vowel(&self, stem_vowel_ind: &str, stem_vowel_sub: &str) -> String {
-        if self.tense == Tense::Perfect && (self.verb.is_deponent() || self.voice == Voice::Passive)
+        if [Tense::Perfect, Tense::Pluperfect, Tense::FuturePerfect].contains(&self.tense)
+            && (self.verb.is_deponent() || self.voice == Voice::Passive)
         {
             return " ".to_string();
         }
@@ -277,7 +278,12 @@ impl VerbInstance<'_> {
             Mood::Subjunctive => "".to_string(),
             _ => match self.tense {
                 Tense::Imperfect => match (self.person, self.number) {
-                    (Person::Third, _) | (Person::First, Number::Singular) => "ba".to_string(),
+                    (Person::First, Number::Singular) => "ba".to_string(),
+                    (Person::Third, _) => match (self.number, self.voice) {
+                        (_, Voice::Active) => "ba".to_string(),
+                        (Number::Singular, Voice::Passive) => "bā".to_string(),
+                        _ => "ba".to_string(),
+                    },
                     _ => "bā".to_string(),
                 },
                 Tense::Future => match (self.person, self.number) {
@@ -293,6 +299,7 @@ impl VerbInstance<'_> {
     fn handle_deponent(&self) -> String {
         let tense = match self.tense {
             Tense::Perfect => Tense::Present,
+            Tense::Pluperfect => Tense::Imperfect,
             _ => Tense::Future,
         };
 
@@ -322,9 +329,15 @@ impl VerbInstance<'_> {
                             Tense::Imperfect => "m",
                             _ => "",
                         },
-                        Voice::Passive => "or",
+                        Voice::Passive => match self.tense {
+                            Tense::Imperfect => "r",
+                            _ => "or",
+                        },
                     },
-                    Mood::Subjunctive => "m",
+                    Mood::Subjunctive => match self.voice {
+                        Voice::Passive => "r",
+                        _ => "m",
+                    },
                     Mood::Imperative => panic!("No imperative first person"),
                 },
                 Number::Plural => match self.voice {
@@ -380,8 +393,8 @@ impl VerbInstance<'_> {
 
         let eic = ei.conjugate();
         match self.tense {
-            Tense::FuturePerfect => match (self.person, self.number) {
-                (Person::Third, Number::Plural) => eic.replace("unt", "int"),
+            Tense::FuturePerfect => match (self.person, self.number, self.voice) {
+                (Person::Third, Number::Plural, Voice::Active) => eic.replace("unt", "int"),
                 _ => eic,
             },
             _ => eic,
@@ -413,8 +426,6 @@ impl VerbInstance<'_> {
                         .collect::<String>()
                         + "isse"
                 }
-                // Voice::Passive => self.verb.supine.clone() + "esse",
-                // Voice::Passive => self.verb.supine.to_string() + "esse",
                 Voice::Passive => format!(
                     "{} esse",
                     self.verb

@@ -16,11 +16,10 @@ pub mod sql_types {
     #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "gender"))]
     pub struct Gender;
-}
 
-diesel::define_sql_function! {
-    /// Maps the PostgreSQL unaccent extension.
-    fn unaccent(input: diesel::sql_types::Text) -> diesel::sql_types::Text;
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "grammatical_case"))]
+    pub struct GrammaticalCase;
 }
 
 diesel::table! {
@@ -52,6 +51,17 @@ diesel::table! {
 
 diesel::table! {
     use diesel::sql_types::*;
+    use super::sql_types::GrammaticalCase;
+
+    latin_prepositions (id) {
+        id -> Uuid,
+        word -> Varchar,
+        cases -> Array<GrammaticalCase>,
+    }
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
     use super::sql_types::Conjugation;
 
     latin_verbs (id) {
@@ -64,4 +74,9 @@ diesel::table! {
     }
 }
 
-diesel::allow_tables_to_appear_in_same_query!(latin_adjectives, latin_nouns, latin_verbs,);
+diesel::allow_tables_to_appear_in_same_query!(
+    latin_adjectives,
+    latin_nouns,
+    latin_prepositions,
+    latin_verbs,
+);

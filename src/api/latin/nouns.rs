@@ -1,13 +1,11 @@
-// use crate::api::latin;
-// use crate::schema::unaccent;
 use crate::{
-    api::app::AppState,
+    api::{app::AppState, unaccent},
     establish_cnx,
     grammar::latin::{
         Number,
         noun::{Case, Noun, NounInstance},
     },
-    schema::{latin_nouns, unaccent},
+    schema::latin_nouns,
 };
 use axum::{
     extract::{Path, Query, State},

@@ -1,7 +1,10 @@
 use ars::api::{
     app,
-    latin::nouns::{decline_noun, search_nouns},
-    latin::verbs::{conjugate_verb, search_verbs},
+    latin::{
+        nouns::{decline_noun, search_nouns},
+        prepositions::search_prepositions,
+        verbs::{conjugate_verb, search_verbs},
+    },
     middleware::log_requests,
 };
 use axum::{Router, middleware, response::Json, routing::get};
@@ -36,11 +39,19 @@ async fn main() {
         .route("/latin/verbs/{verb}/conjugate", get(conjugate_verb))
         .with_state(app::AppState {});
 
+    let prepositions_routes = Router::new()
+        .route(
+            "/latin/prepositions/{preposition}",
+            get(search_prepositions),
+        )
+        .with_state(app::AppState {});
+
     let app = Router::new()
         .route("/", get(root))
         .route("/health", get(health))
         .merge(nouns_routes)
         .merge(verbs_routes)
+        .merge(prepositions_routes)
         .layer(middleware::from_fn(log_requests));
 
     let addr = format!("0.0.0.0:{}", port);

@@ -26,13 +26,22 @@ pub enum Declension {
     V,
 }
 
-#[derive(strum::EnumIter, Debug, PartialEq, Clone, Copy)]
+#[derive(
+    strum::EnumIter, Debug, PartialEq, Clone, Copy, DbEnum, serde::Serialize, serde::Deserialize,
+)]
+#[ExistingTypePath = "crate::schema::sql_types::GrammaticalCase"]
 pub enum Case {
+    #[db_rename = "Nominative"]
     Nominative,
+    #[db_rename = "Genitive"]
     Genitive,
+    #[db_rename = "Dative"]
     Dative,
+    #[db_rename = "Accusative"]
     Accusative,
+    #[db_rename = "Ablative"]
     Ablative,
+    #[db_rename = "Vocative"]
     Vocative,
 }
 
