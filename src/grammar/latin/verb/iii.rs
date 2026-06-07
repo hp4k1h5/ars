@@ -26,7 +26,7 @@ impl VerbInstance<'_> {
         };
 
         match self.mood {
-            Mood::Indicative => match self.tense {
+            Mood::Indicative | Mood::Imperative => match self.tense {
                 Tense::Present | Tense::Imperfect | Tense::Future => self
                     .verb
                     .present
@@ -81,6 +81,7 @@ impl VerbInstance<'_> {
                         Tense::Imperfect => "e".to_string(),
                         _ => "a".to_string(),
                     },
+                    Mood::Imperative => panic!("No 1st person imperative"),
                 },
                 Number::Plural => match self.mood {
                     Mood::Indicative => match self.tense {
@@ -94,10 +95,11 @@ impl VerbInstance<'_> {
                         Tense::Imperfect => "ē".to_string(),
                         _ => "ā".to_string(),
                     },
+                    Mood::Imperative => panic!("No 1st person imperative"),
                 },
             },
             Person::Second => match self.mood {
-                Mood::Indicative => match self.tense {
+                Mood::Indicative | Mood::Imperative => match self.tense {
                     Tense::Present => match (self.voice, self.person, self.number) {
                         (Voice::Passive, Person::Second, Number::Singular) => "e".to_string(),
                         _ => "i".to_string(),
@@ -115,15 +117,9 @@ impl VerbInstance<'_> {
             },
             Person::Third => match self.mood {
                 Mood::Indicative => match self.tense {
-                    Tense::Present => match self.voice {
-                        Voice::Active => match self.number {
-                            Number::Singular => "i".to_string(),
-                            Number::Plural => "u".to_string(),
-                        },
-                        Voice::Passive => match self.number {
-                            Number::Singular => "i".to_string(),
-                            Number::Plural => "u".to_string(),
-                        },
+                    Tense::Present => match self.number {
+                        Number::Singular => "i".to_string(),
+                        Number::Plural => "u".to_string(),
                     },
                     Tense::Imperfect => "ē".to_string(),
                     Tense::Future => "e".to_string(),
@@ -141,6 +137,7 @@ impl VerbInstance<'_> {
                     Tense::Imperfect => "e".to_string(),
                     _ => "a".to_string(),
                 },
+                Mood::Imperative => panic!("No 3rd person imperative"),
             },
         }
     }

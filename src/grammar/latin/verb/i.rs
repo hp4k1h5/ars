@@ -495,4 +495,34 @@ mod tests {
 
         assert_eq!(expected, result)
     }
+
+    #[rstest]
+    #[case(Person::Second, Number::Singular, "amā")]
+    #[case(Person::Second, Number::Plural, "amāte")]
+    fn test_conj_pres_imp_act_i(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::I,
+            present: "amō".to_string(),
+            infinitive: "amāre".to_string(),
+            perfect: "amāvī".to_string(),
+            supine: Some("amātum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Present,
+            mood: Mood::Imperative,
+            voice: Voice::Active,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
 }

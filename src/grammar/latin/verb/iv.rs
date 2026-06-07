@@ -14,7 +14,7 @@ impl VerbInstance<'_> {
 
     fn get_stem_iv(&self) -> String {
         match self.mood {
-            Mood::Indicative => match self.tense {
+            Mood::Indicative | Mood::Imperative => match self.tense {
                 Tense::Present | Tense::Future => self
                     .verb
                     .present
@@ -76,6 +76,7 @@ impl VerbInstance<'_> {
                         Tense::Imperfect => "e".to_string(),
                         _ => "a".to_string(),
                     },
+                    Mood::Imperative => panic!("No 1st person imperative"),
                 },
                 Number::Plural => match self.mood {
                     Mood::Indicative => match self.tense {
@@ -89,6 +90,7 @@ impl VerbInstance<'_> {
                         Tense::Imperfect => "ē".to_string(),
                         _ => "ā".to_string(),
                     },
+                    Mood::Imperative => panic!("No 1st person imperative"),
                 },
             },
             Person::Second => match self.mood {
@@ -104,6 +106,7 @@ impl VerbInstance<'_> {
                     Tense::Imperfect => "ē".to_string(),
                     _ => "ā".to_string(),
                 },
+                Mood::Imperative => "ē".to_string(),
             },
             Person::Third => match self.mood {
                 Mood::Indicative => match self.tense {
@@ -133,6 +136,7 @@ impl VerbInstance<'_> {
                     Tense::Imperfect => "e".to_string(),
                     _ => "a".to_string(),
                 },
+                Mood::Imperative => panic!("No 3rd person imperative"),
             },
         }
     }
@@ -164,6 +168,7 @@ impl VerbInstance<'_> {
                         Voice::Passive => "r",
                     },
                     Mood::Subjunctive => "m",
+                    Mood::Imperative => panic!("No 1st person imperative"),
                 },
                 Number::Plural => match self.voice {
                     Voice::Active => "mus",

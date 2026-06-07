@@ -52,6 +52,7 @@ pub enum Tense {
 pub enum Mood {
     Indicative,
     Subjunctive,
+    Imperative,
 }
 
 #[derive(Debug, Display, EnumString, Clone, Copy, PartialEq)]
@@ -243,6 +244,7 @@ impl VerbInstance<'_> {
                         _ => local_unaccent(&stem_vowel).to_string(),
                     },
                     Mood::Subjunctive => "eri".to_string(),
+                    Mood::Imperative => stem_vowel,
                 },
                 _ => "".to_string(),
             },
@@ -262,6 +264,7 @@ impl VerbInstance<'_> {
                 (Person::First, Number::Singular) => match self.mood {
                     Mood::Indicative => "".to_string(),
                     Mood::Subjunctive => local_unaccent(&stem_vowel).to_string(),
+                    Mood::Imperative => panic!("No imperative first person"),
                 },
                 (Person::Second, _) => stem_vowel,
                 _ => stem_vowel,
@@ -322,6 +325,7 @@ impl VerbInstance<'_> {
                         Voice::Passive => "or",
                     },
                     Mood::Subjunctive => "m",
+                    Mood::Imperative => panic!("No imperative first person"),
                 },
                 Number::Plural => match self.voice {
                     Voice::Active => "mus",
@@ -332,13 +336,15 @@ impl VerbInstance<'_> {
                 Number::Singular => match self.voice {
                     Voice::Active => match (self.tense, self.mood) {
                         (Tense::Perfect, Mood::Indicative) => "stī",
+                        (Tense::Present, Mood::Imperative) => "",
                         _ => "s",
                     },
                     Voice::Passive => "ris",
                 },
                 Number::Plural => match self.voice {
-                    Voice::Active => match (self.mood, self.tense) {
-                        (Mood::Indicative, Tense::Perfect) => "stis",
+                    Voice::Active => match (self.tense, self.mood) {
+                        (Tense::Perfect, Mood::Indicative) => "stis",
+                        (Tense::Present, Mood::Imperative) => "te",
                         _ => "tis",
                     },
                     Voice::Passive => "minī",
