@@ -4,19 +4,22 @@ use super::*;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rstest::rstest;
+    use rstest::{fixture, rstest};
 
-    #[test]
-    fn test_verb_i() {
-        let verb = Verb {
+    #[fixture]
+    fn verb() -> Verb {
+        Verb {
             id: None,
             conjugation: Conjugation::I,
             present: "amō".to_string(),
             infinitive: "amāre".to_string(),
             perfect: "amāvi".to_string(),
             supine: Some("amātum".to_string()),
-        };
+        }
+    }
 
+    #[rstest]
+    fn test_verb_i(verb: Verb) {
         assert_eq!(verb.present, "amō")
     }
 
@@ -31,15 +34,8 @@ mod tests {
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::I,
-            present: "amō".to_string(),
-            infinitive: "amāre".to_string(),
-            perfect: "amāvi".to_string(),
-            supine: Some("amātum".to_string()),
-        };
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -48,9 +44,7 @@ mod tests {
             mood: Mood::Indicative,
             voice: Voice::Active,
         };
-
         let result = vi.conjugate();
-
         assert_eq!(expected, result)
     }
 
@@ -82,9 +76,7 @@ mod tests {
             mood: Mood::Indicative,
             voice: Voice::Active,
         };
-
         let result = vi.conjugate();
-
         assert_eq!(expected, result)
     }
 
@@ -99,16 +91,8 @@ mod tests {
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::I,
-            present: "amō".to_string(),
-            infinitive: "amāre".to_string(),
-            perfect: "amāvī".to_string(),
-            supine: Some("amātum".to_string()),
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -118,7 +102,6 @@ mod tests {
             voice: Voice::Active,
         };
         let result = vi.conjugate();
-
         assert_eq!(expected, result)
     }
 
@@ -133,16 +116,8 @@ mod tests {
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::I,
-            present: "amō".to_string(),
-            infinitive: "amāre".to_string(),
-            perfect: "amāvi".to_string(),
-            supine: Some("amātum".to_string()),
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -167,16 +142,8 @@ mod tests {
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::I,
-            present: "amō".to_string(),
-            infinitive: "amāre".to_string(),
-            perfect: "amāvi".to_string(),
-            supine: Some("amātum".to_string()),
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -186,7 +153,6 @@ mod tests {
             voice: Voice::Active,
         };
         let result = vi.conjugate();
-
         assert_eq!(expected, result)
     }
 
@@ -201,16 +167,8 @@ mod tests {
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::I,
-            present: "amō".to_string(),
-            infinitive: "amāre".to_string(),
-            perfect: "amāvī".to_string(),
-            supine: Some("amātum".to_string()),
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -220,7 +178,6 @@ mod tests {
             voice: Voice::Active,
         };
         let result = vi.conjugate();
-
         assert_eq!(expected, result)
     }
 
@@ -235,16 +192,8 @@ mod tests {
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::I,
-            present: "amō".to_string(),
-            infinitive: "amāre".to_string(),
-            perfect: "amāvī".to_string(),
-            supine: Some("amātum".to_string()),
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -254,7 +203,6 @@ mod tests {
             voice: Voice::Active,
         };
         let result = vi.conjugate();
-
         assert_eq!(expected, result)
     }
 
@@ -269,16 +217,8 @@ mod tests {
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::I,
-            present: "amō".to_string(),
-            infinitive: "amāre".to_string(),
-            perfect: "amāvī".to_string(),
-            supine: Some("amātum".to_string()),
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -288,7 +228,6 @@ mod tests {
             voice: Voice::Active,
         };
         let result = vi.conjugate();
-
         assert_eq!(expected, result)
     }
 
@@ -303,16 +242,8 @@ mod tests {
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::I,
-            present: "amō".to_string(),
-            infinitive: "amāre".to_string(),
-            perfect: "amāvī".to_string(),
-            supine: Some("amātum".to_string()),
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -322,7 +253,6 @@ mod tests {
             voice: Voice::Active,
         };
         let result = vi.conjugate();
-
         assert_eq!(expected, result)
     }
 
@@ -337,16 +267,8 @@ mod tests {
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::I,
-            present: "amō".to_string(),
-            infinitive: "amāre".to_string(),
-            perfect: "amāvī".to_string(),
-            supine: Some("amātum".to_string()),
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -356,7 +278,6 @@ mod tests {
             voice: Voice::Passive,
         };
         let result = vi.conjugate();
-
         assert_eq!(expected, result)
     }
 
@@ -390,7 +311,6 @@ mod tests {
             voice: Voice::Passive,
         };
         let result = vi.conjugate();
-
         assert_eq!(expected, result)
     }
 
@@ -405,16 +325,8 @@ mod tests {
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::I,
-            present: "amō".to_string(),
-            infinitive: "amāre".to_string(),
-            perfect: "amāvī".to_string(),
-            supine: Some("amātum".to_string()),
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -424,7 +336,6 @@ mod tests {
             voice: Voice::Active,
         };
         let result = vi.conjugate();
-
         assert_eq!(expected, result)
     }
 
@@ -439,16 +350,8 @@ mod tests {
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::I,
-            present: "amō".to_string(),
-            infinitive: "amāre".to_string(),
-            perfect: "amāvī".to_string(),
-            supine: Some("amātum".to_string()),
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -458,7 +361,6 @@ mod tests {
             voice: Voice::Active,
         };
         let result = vi.conjugate();
-
         assert_eq!(expected, result)
     }
 
@@ -473,16 +375,8 @@ mod tests {
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::I,
-            present: "amō".to_string(),
-            infinitive: "amāre".to_string(),
-            perfect: "amāvī".to_string(),
-            supine: Some("amātum".to_string()),
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -492,7 +386,6 @@ mod tests {
             voice: Voice::Active,
         };
         let result = vi.conjugate();
-
         assert_eq!(expected, result)
     }
 
@@ -503,16 +396,8 @@ mod tests {
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::I,
-            present: "amō".to_string(),
-            infinitive: "amāre".to_string(),
-            perfect: "amāvī".to_string(),
-            supine: Some("amātum".to_string()),
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -522,7 +407,6 @@ mod tests {
             voice: Voice::Active,
         };
         let result = vi.conjugate();
-
         assert_eq!(expected, result)
     }
 }

@@ -4,19 +4,22 @@ use super::*;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rstest::rstest;
+    use rstest::{fixture, rstest};
 
-    #[test]
-    fn test_verb_ii() {
-        let verb = Verb {
+    #[fixture]
+    fn verb() -> Verb {
+        Verb {
             id: None,
             conjugation: Conjugation::II,
             present: "rīdeō".to_string(),
             infinitive: "rīdēre".to_string(),
             perfect: "rīsī".to_string(),
             supine: Some("rīsum".to_string()),
-        };
+        }
+    }
 
+    #[rstest]
+    fn test_verb_ii(verb: Verb) {
         assert_eq!(verb.present, "rīdeō")
     }
 
@@ -31,16 +34,8 @@ mod tests {
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::II,
-            present: "rīdeō".to_string(),
-            infinitive: "rīdēre".to_string(),
-            perfect: "rīsī".to_string(),
-            supine: Some("rīsum".to_string()),
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
