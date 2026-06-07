@@ -27,7 +27,7 @@ impl VerbInstance<'_> {
                     .chars()
                     .take(self.verb.present.chars().count() - 1)
                     .collect(),
-                Tense::Perfect => self
+                Tense::Perfect | Tense::Pluperfect | Tense::FuturePerfect => self
                     .verb
                     .perfect
                     .chars()
@@ -47,14 +47,13 @@ impl VerbInstance<'_> {
                     .chars()
                     .take(self.verb.infinitive.chars().count() - 1)
                     .collect(),
-                Tense::Perfect => self
+                Tense::Perfect | Tense::Pluperfect | Tense::FuturePerfect => self
                     .verb
                     .perfect
                     .chars()
                     .take(self.verb.perfect.chars().count() - 1)
                     .collect(),
                 Tense::Future => panic!("There is no future subjunctive"),
-                // _ => "".to_string(),
             },
         }
     }
@@ -70,6 +69,7 @@ impl VerbInstance<'_> {
                         },
                         Tense::Imperfect => "ē".to_string(),
                         Tense::Future => "a".to_string(),
+                        _ => "".to_string(),
                     },
                     Mood::Subjunctive => match self.tense {
                         Tense::Perfect => "eri".to_string(),
@@ -82,6 +82,7 @@ impl VerbInstance<'_> {
                         Tense::Present => "ī".to_string(),
                         Tense::Imperfect | Tense::Future => "ē".to_string(),
                         Tense::Perfect => "i".to_string(),
+                        _ => "".to_string(),
                     },
                     Mood::Subjunctive => match self.tense {
                         Tense::Perfect => "eri".to_string(),
@@ -96,6 +97,7 @@ impl VerbInstance<'_> {
                     Tense::Perfect => "i".to_string(),
                     Tense::Imperfect => "ē".to_string(),
                     Tense::Future => "ē".to_string(),
+                    _ => "".to_string(),
                 },
                 Mood::Subjunctive => match self.tense {
                     Tense::Perfect => "eri".to_string(),
@@ -121,6 +123,7 @@ impl VerbInstance<'_> {
                         Number::Singular => "i".to_string(),
                         Number::Plural => "ēru".to_string(),
                     },
+                    _ => "".to_string(),
                 },
                 Mood::Subjunctive => match self.tense {
                     Tense::Perfect => match self.number {
@@ -156,6 +159,7 @@ impl VerbInstance<'_> {
                             Tense::Present => "ō",
                             Tense::Imperfect | Tense::Future => "m",
                             Tense::Perfect => "ī",
+                            _ => "",
                         },
                         Voice::Passive => "r",
                     },

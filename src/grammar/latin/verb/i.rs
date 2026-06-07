@@ -393,4 +393,106 @@ mod tests {
 
         assert_eq!(expected, result)
     }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "amāveram")]
+    #[case(Person::Second, Number::Singular, "amāverās")]
+    #[case(Person::Third, Number::Singular, "amāverat")]
+    #[case(Person::First, Number::Plural, "amāverāmus")]
+    #[case(Person::Second, Number::Plural, "amāverātis")]
+    #[case(Person::Third, Number::Plural, "amāverant")]
+    fn test_conj_pluperf_ind_act_i(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::I,
+            present: "amō".to_string(),
+            infinitive: "amāre".to_string(),
+            perfect: "amāvī".to_string(),
+            supine: Some("amātum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Pluperfect,
+            mood: Mood::Indicative,
+            voice: Voice::Active,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "amāverō")]
+    #[case(Person::Second, Number::Singular, "amāveris")]
+    #[case(Person::Third, Number::Singular, "amāverit")]
+    #[case(Person::First, Number::Plural, "amāverimus")]
+    #[case(Person::Second, Number::Plural, "amāveritis")]
+    #[case(Person::Third, Number::Plural, "amāverint")]
+    fn test_conj_futperf_ind_act_i(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::I,
+            present: "amō".to_string(),
+            infinitive: "amāre".to_string(),
+            perfect: "amāvī".to_string(),
+            supine: Some("amātum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::FuturePerfect,
+            mood: Mood::Indicative,
+            voice: Voice::Active,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "amāvissem")]
+    #[case(Person::Second, Number::Singular, "amāvissēs")]
+    #[case(Person::Third, Number::Singular, "amāvisset")]
+    #[case(Person::First, Number::Plural, "amāvissēmus")]
+    #[case(Person::Second, Number::Plural, "amāvissētis")]
+    #[case(Person::Third, Number::Plural, "amāvissent")]
+    fn test_conj_pluperf_subj_act_i(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::I,
+            present: "amō".to_string(),
+            infinitive: "amāre".to_string(),
+            perfect: "amāvī".to_string(),
+            supine: Some("amātum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Pluperfect,
+            mood: Mood::Subjunctive,
+            voice: Voice::Active,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
 }

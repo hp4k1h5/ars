@@ -44,6 +44,8 @@ pub enum Tense {
     Imperfect,
     Future,
     Perfect,
+    Pluperfect,
+    FuturePerfect,
 }
 
 #[derive(Debug, Display, EnumString, Clone, Copy, PartialEq)]
@@ -126,10 +128,11 @@ impl VerbInstance<'_> {
         let stem = self.get_stem();
         let stem_vowel = self.get_stem_vowel(stem_vowel_ind, stem_vowel_sub);
         let infix: String = self.get_infix();
-        let ending: &str = if self.tense == Tense::Perfect && self.voice == Voice::Passive {
-            &self.handle_deponent()
-        } else {
-            self.get_ending()
+        let ending = match (self.tense, self.voice, self.mood) {
+            (Tense::Perfect, Voice::Passive, _) => &self.handle_deponent(),
+            (Tense::Pluperfect, _, Mood::Subjunctive) => self.get_ending(),
+            (Tense::Pluperfect | Tense::FuturePerfect, _, _) => &self.esse_helper(),
+            _ => self.get_ending(),
         };
         println!("{stem}  {stem_vowel}  {infix}  {ending}  ");
         format!("{stem}{stem_vowel}{infix}{ending}")
@@ -170,7 +173,7 @@ impl VerbInstance<'_> {
                 ),
                 true => (self.verb.present.clone(), 2),
             },
-            Tense::Perfect => match self.voice {
+            Tense::Perfect | Tense::Pluperfect | Tense::FuturePerfect => match self.voice {
                 Voice::Active => (self.verb.perfect.clone(), 1),
                 Voice::Passive => return self.handle_supine(),
             },
@@ -213,8 +216,8 @@ impl VerbInstance<'_> {
         match self.verb.conjugation {
             Conjugation::I => ("ā", "ē"),
             Conjugation::II => ("ē", "ā"),
-            Conjugation::III => ("i", "ā"),
-            _ => ("", ""),
+            // Conjugation::III => ("i", "ā"),
+            _ => todo!("Integrate II, III"),
         }
     }
 
@@ -243,6 +246,14 @@ impl VerbInstance<'_> {
                 },
                 _ => "".to_string(),
             },
+            (Mood::Subjunctive, Tense::Pluperfect) => {
+                "iss".to_string()
+                    + match (self.person, self.number) {
+                        (Person::Second, _) | (Person::First, Number::Plural) => "ē",
+                        _ => "e",
+                    }
+            }
+            (_, Tense::Pluperfect | Tense::FuturePerfect) => "".to_string(),
             _ => match (self.person, self.number) {
                 (Person::Third, _) => match (self.voice, self.number) {
                     (Voice::Passive, Number::Singular) => stem_vowel,
@@ -298,7 +309,6 @@ impl VerbInstance<'_> {
                     Mood::Indicative => match self.voice {
                         Voice::Active => match self.tense {
                             Tense::Present => match self.verb.conjugation {
-                                Conjugation::I => "ō",
                                 Conjugation::II => "eō",
                                 _ => "ō",
                             },
@@ -307,7 +317,7 @@ impl VerbInstance<'_> {
                                 _ => "ō",
                             },
                             Tense::Imperfect => "m",
-                            Tense::Perfect => "",
+                            _ => "",
                         },
                         Voice::Passive => "or",
                     },
@@ -344,6 +354,31 @@ impl VerbInstance<'_> {
                     Voice::Passive => "ntur",
                 },
             },
+        }
+    }
+
+    fn esse_helper(&self) -> String {
+        let tense = match self.tense {
+            Tense::Pluperfect => Tense::Imperfect,
+            _ => Tense::Future,
+        };
+        let verb = self.verb.esse();
+        let mut ei = VerbInstance {
+            verb: &verb,
+            person: self.person,
+            number: self.number,
+            tense,
+            mood: self.mood,
+            voice: self.voice,
+        };
+
+        let eic = ei.conjugate();
+        match self.tense {
+            Tense::FuturePerfect => match (self.person, self.number) {
+                (Person::Third, Number::Plural) => eic.replace("unt", "int"),
+                _ => eic,
+            },
+            _ => eic,
         }
     }
 
@@ -384,7 +419,6 @@ impl VerbInstance<'_> {
                 ),
             },
             _ => "".to_string(),
-            // _ => panic!("Not implemented"),
         }
     }
 }
