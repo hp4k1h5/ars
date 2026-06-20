@@ -30,7 +30,7 @@ mod tests {
     #[case(Person::First, Number::Plural, "amāmus")]
     #[case(Person::Second, Number::Plural, "amātis")]
     #[case(Person::Third, Number::Plural, "amant")]
-    fn test_conj_pres_ind_act_i(
+    fn test_conj_expected_i(
         #[case] person: Person,
         #[case] number: Number,
         #[case] expected: String,

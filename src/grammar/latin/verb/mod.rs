@@ -124,26 +124,12 @@ pub struct VerbInstance<'a> {
 }
 
 impl VerbInstance<'_> {
-    pub(super) fn conjugate_t(&mut self) -> String {
-        let (stem_vowel_ind, stem_vowel_sub) = self.match_stem_vowel();
-        let stem = self.get_stem();
-        let stem_vowel = self.get_stem_vowel(stem_vowel_ind, stem_vowel_sub);
-        let infix: String = self.get_infix();
-        let ending = match (self.tense, self.voice, self.mood) {
-            (Tense::Perfect, Voice::Passive, _) => &self.handle_deponent(),
-            (Tense::Pluperfect, _, Mood::Subjunctive) => self.get_ending(),
-            (Tense::Pluperfect | Tense::FuturePerfect, _, _) => &self.esse_helper(),
-            _ => self.get_ending(),
-        };
-        println!("{stem}  {stem_vowel}  {infix}  {ending}  ");
-        format!("{stem}{stem_vowel}{infix}{ending}")
-    }
     pub fn conjugate(&mut self) -> String {
         if self.verb.is_deponent() {
             self.voice = Voice::Passive
         }
         match self.verb.conjugation {
-            Conjugation::I | Conjugation::II => self.conjugate_t(),
+            Conjugation::I | Conjugation::II => self.conjugate_i_ii(),
             Conjugation::III => self.conjugate_iii(),
             Conjugation::IV => self.conjugate_iv(),
             Conjugation::Esse => self.conjugate_esse(),
@@ -151,19 +137,25 @@ impl VerbInstance<'_> {
         }
     }
 
+    pub fn conjugate_i_ii(&mut self) -> String {
+        let stem = self.get_stem();
+        let stem_vowel = self.get_stem_vowel();
+        let infix: String = self.get_infix();
+        let ending = match (self.tense, self.voice, self.mood) {
+            (Tense::Perfect, Voice::Passive, _) => &self.handle_deponent(),
+            (Tense::Perfect, Voice::Active, _) => &self.perfect_helper(),
+            (Tense::Pluperfect, _, Mood::Subjunctive) => self.get_ending(),
+            (Tense::Pluperfect | Tense::FuturePerfect, _, _) => &self.perfect_helper(),
+            _ => self.get_ending(),
+        };
+        println!("{stem} | {stem_vowel} | {infix} | {ending}  ");
+        format!("{stem}{stem_vowel}{infix}{ending}")
+    }
     fn get_stem(&self) -> String {
-        if self.mood == Mood::Subjunctive && self.tense == Tense::Imperfect {
-            return self
-                .verb
-                .infinitive
-                .chars()
-                .take(self.verb.infinitive.chars().count() - 1)
-                .collect();
-        }
-
         let deponent = self.verb.is_deponent();
-        let (prinicpal_part, ch) = match self.tense {
-            Tense::Present | Tense::Imperfect | Tense::Future => match deponent {
+        let (prinicpal_part, ch) = match (self.tense, self.mood) {
+            (Tense::Imperfect, Mood::Subjunctive) => (self.verb.infinitive.clone(), 1),
+            (Tense::Present | Tense::Imperfect | Tense::Future, _) => match deponent {
                 false => (
                     self.verb.present.clone(),
                     match self.verb.conjugation {
@@ -174,7 +166,7 @@ impl VerbInstance<'_> {
                 ),
                 true => (self.verb.present.clone(), 2),
             },
-            Tense::Perfect | Tense::Pluperfect | Tense::FuturePerfect => match self.voice {
+            (Tense::Perfect | Tense::Pluperfect | Tense::FuturePerfect, _) => match self.voice {
                 Voice::Active => (self.verb.perfect.clone(), 1),
                 Voice::Passive => return self.handle_supine(),
             },
@@ -218,37 +210,28 @@ impl VerbInstance<'_> {
             Conjugation::I => ("ā", "ē"),
             Conjugation::II => ("ē", "ā"),
             // Conjugation::III => ("i", "ā"),
-            _ => todo!("Integrate II, III"),
+            _ => todo!("Integrate III, IV, Irr"),
         }
     }
 
-    fn get_stem_vowel(&self, stem_vowel_ind: &str, stem_vowel_sub: &str) -> String {
-        if [Tense::Perfect, Tense::Pluperfect, Tense::FuturePerfect].contains(&self.tense)
-            && (self.verb.is_deponent() || self.voice == Voice::Passive)
-        {
-            return " ".to_string();
+    fn get_stem_vowel(&self) -> String {
+        let (stem_vowel_ind, stem_vowel_sub) = self.match_stem_vowel();
+        if [Tense::Perfect, Tense::Pluperfect, Tense::FuturePerfect].contains(&self.tense) {
+            if (self.verb.is_deponent() || self.voice == Voice::Passive) {
+                return " ".to_string();
+            } else {
+                return "".to_string();
+            }
         }
         let stem_vowel = if self.mood == Mood::Subjunctive {
             stem_vowel_sub.to_string()
         } else if self.tense == Tense::Perfect {
-            "ī".to_string()
+            "".to_string()
         } else {
             stem_vowel_ind.to_string()
         };
         match (self.mood, self.tense) {
             (Mood::Indicative, Tense::Imperfect | Tense::Future) => stem_vowel,
-            (_, Tense::Perfect) => match self.voice {
-                Voice::Active => match self.mood {
-                    Mood::Indicative => match (self.person, self.number) {
-                        (Person::First, Number::Singular) => stem_vowel,
-                        (Person::Third, Number::Plural) => "ēru".to_string(),
-                        _ => local_unaccent(&stem_vowel).to_string(),
-                    },
-                    Mood::Subjunctive => "eri".to_string(),
-                    Mood::Imperative => stem_vowel,
-                },
-                _ => "".to_string(),
-            },
             (Mood::Subjunctive, Tense::Pluperfect) => {
                 "iss".to_string()
                     + match (self.person, self.number) {
@@ -274,8 +257,15 @@ impl VerbInstance<'_> {
     }
 
     fn get_infix(&self) -> String {
-        match self.mood {
-            Mood::Subjunctive => "".to_string(),
+        match (self.tense, self.mood) {
+            (Tense::Pluperfect, Mood::Subjunctive) => {
+                "iss".to_string()
+                    + match (self.person, self.number) {
+                        (Person::Second, _) | (Person::First, Number::Plural) => "ē",
+                        (_, _) => "e",
+                    }
+            }
+            (_, Mood::Subjunctive) => "".to_string(),
             _ => match self.tense {
                 Tense::Imperfect => match (self.person, self.number) {
                     (Person::First, Number::Singular) => "ba".to_string(),
@@ -392,12 +382,47 @@ impl VerbInstance<'_> {
         };
 
         let eic = ei.conjugate();
-        match self.tense {
-            Tense::FuturePerfect => match (self.person, self.number, self.voice) {
+        match (self.tense, self.mood, self.voice) {
+            (_, Mood::Subjunctive, _) => match (self.person, self.number, self.voice) {
                 (Person::Third, Number::Plural, Voice::Active) => eic.replace("unt", "int"),
+                (Person::First, Number::Singular, Voice::Active) => eic.replace("ō", "im"),
+                _ => eic,
+            },
+            (Tense::FuturePerfect, _, Voice::Active) => match (self.person, self.number) {
+                (Person::Third, Number::Plural) => eic.replace("unt", "int"),
                 _ => eic,
             },
             _ => eic,
+        }
+    }
+
+    pub fn perfect_helper(&self) -> String {
+        match (self.tense, self.voice) {
+            (Tense::Perfect, Voice::Active) => match self.mood {
+                Mood::Subjunctive => self.esse_helper(),
+                Mood::Indicative => match (self.person, self.number) {
+                    (Person::First, Number::Singular) => "ī".to_string(),
+                    (Person::Second, Number::Singular) => "istī".to_string(),
+                    (Person::Third, Number::Singular) => "it".to_string(),
+                    (Person::First, Number::Plural) => "imus".to_string(),
+                    (Person::Second, Number::Plural) => "istis".to_string(),
+                    (Person::Third, Number::Plural) => "ērunt".to_string(),
+                },
+                _ => "".to_string(),
+            },
+
+            (Tense::Pluperfect | Tense::FuturePerfect, _) => match self.mood {
+                Mood::Subjunctive => {
+                    "iss".to_string()
+                        + match (self.person, self.number) {
+                            (Person::Second, _) | (Person::First, Number::Plural) => "ē",
+                            _ => "e",
+                        }
+                }
+                Mood::Indicative => self.esse_helper(),
+                _ => "".to_string(),
+            },
+            _ => "".to_string(),
         }
     }
 

@@ -2,12 +2,17 @@ use crate::grammar::latin::verb::*;
 
 impl VerbInstance<'_> {
     fn get_stem_esse(&self) -> String {
-        match self.tense {
-            Tense::Present => match (self.person, self.number) {
+        match (self.tense, self.mood) {
+            (Tense::Present, Mood::Subjunctive) => match (self.person, self.number) {
+                (Person::Second, _) | (Person::First, Number::Plural) => "sī".to_string(),
+                _ => "si".to_string(),
+            },
+            (Tense::Present, _) => match (self.person, self.number) {
                 (Person::First, _) | (Person::Third, Number::Plural) => "su".to_string(),
                 _ => "es".to_string(),
             },
-            Tense::Imperfect | Tense::Future => "er".to_string(),
+            (Tense::Imperfect | Tense::Future, _) => "er".to_string(),
+            (Tense::Perfect, _) => "fu".to_string(),
             _ => "".to_string(),
         }
     }
@@ -22,8 +27,8 @@ impl VerbInstance<'_> {
                 Number::Plural => "mus".to_string(),
             },
             Person::Second => match self.number {
-                Number::Singular => match self.tense {
-                    Tense::Present => "".to_string(),
+                Number::Singular => match (self.tense, self.mood) {
+                    (Tense::Present, Mood::Indicative) => "".to_string(),
                     _ => "s".to_string(),
                 },
                 Number::Plural => "tis".to_string(),
@@ -57,7 +62,11 @@ impl VerbInstance<'_> {
     pub fn conjugate_esse(&self) -> String {
         let stem = &self.get_stem_esse();
         let stem_vowel = &self.get_stem_vowel_esse();
-        let ending: &str = &self.get_ending_esse();
+
+        let ending: &str = match self.tense {
+            Tense::Perfect | Tense::Pluperfect | Tense::FuturePerfect => &self.perfect_helper(),
+            _ => &self.get_ending_esse(),
+        };
 
         format!("{stem}{stem_vowel}{ending}")
     }
@@ -66,19 +75,22 @@ impl VerbInstance<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rstest::rstest;
+    use rstest::{fixture, rstest};
 
-    #[test]
-    fn test_verb_esse() {
-        let verb = Verb {
+    #[fixture]
+    fn verb() -> Verb {
+        Verb {
             id: None,
             conjugation: Conjugation::Esse,
             present: "sum".to_string(),
             infinitive: "esse".to_string(),
             perfect: "fuī".to_string(),
             supine: None,
-        };
+        }
+    }
 
+    #[rstest]
+    fn test_verb_esse(verb: Verb) {
         assert_eq!(verb.present, "sum")
     }
 
@@ -89,20 +101,12 @@ mod tests {
     #[case(Person::First, Number::Plural, "sumus")]
     #[case(Person::Second, Number::Plural, "estis")]
     #[case(Person::Third, Number::Plural, "sunt")]
-    fn test_conj_pres_ind_act_sum(
+    fn test_conj_expected_sum(
         #[case] person: Person,
         #[case] number: Number,
-        #[case] result: String,
+        #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::Esse,
-            present: "sum".to_string(),
-            infinitive: "esse".to_string(),
-            perfect: "fuī".to_string(),
-            supine: None,
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -112,9 +116,9 @@ mod tests {
             voice: Voice::Active,
         };
 
-        let pres_ind_act = vi.conjugate();
+        let result = vi.conjugate();
 
-        assert_eq!(pres_ind_act, result)
+        assert_eq!(expected, result)
     }
 
     #[rstest]
@@ -124,20 +128,12 @@ mod tests {
     #[case(Person::First, Number::Plural, "erāmus")]
     #[case(Person::Second, Number::Plural, "erātis")]
     #[case(Person::Third, Number::Plural, "erant")]
-    fn test_conj_pres_impf_act_sum(
+    fn test_conj_impf_ind_act_sum(
         #[case] person: Person,
         #[case] number: Number,
-        #[case] result: String,
+        #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::Esse,
-            present: "sum".to_string(),
-            infinitive: "esse".to_string(),
-            perfect: "fuī".to_string(),
-            supine: None,
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -147,9 +143,9 @@ mod tests {
             voice: Voice::Active,
         };
 
-        let pres_ind_act = vi.conjugate();
+        let result = vi.conjugate();
 
-        assert_eq!(pres_ind_act, result)
+        assert_eq!(expected, result)
     }
 
     #[rstest]
@@ -159,20 +155,12 @@ mod tests {
     #[case(Person::First, Number::Plural, "erimus")]
     #[case(Person::Second, Number::Plural, "eritis")]
     #[case(Person::Third, Number::Plural, "erunt")]
-    fn test_conj_pres_fut_act_sum(
+    fn test_conj_fut_ind_act_sum(
         #[case] person: Person,
         #[case] number: Number,
-        #[case] result: String,
+        #[case] expected: String,
+        verb: Verb,
     ) {
-        let verb = Verb {
-            id: None,
-            conjugation: Conjugation::Esse,
-            present: "sum".to_string(),
-            infinitive: "esse".to_string(),
-            perfect: "fuī".to_string(),
-            supine: None,
-        };
-
         let mut vi = VerbInstance {
             verb: &verb,
             person,
@@ -182,8 +170,88 @@ mod tests {
             voice: Voice::Active,
         };
 
-        let pres_ind_act = vi.conjugate();
+        let result = vi.conjugate();
 
-        assert_eq!(pres_ind_act, result)
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "fuī")]
+    #[case(Person::Second, Number::Singular, "fuistī")]
+    #[case(Person::Third, Number::Singular, "fuit")]
+    #[case(Person::First, Number::Plural, "fuimus")]
+    #[case(Person::Second, Number::Plural, "fuistis")]
+    #[case(Person::Third, Number::Plural, "fuērunt")]
+    fn test_conj_perf_ind_act_sum(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+        verb: Verb,
+    ) {
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Perfect,
+            mood: Mood::Indicative,
+            voice: Voice::Active,
+        };
+
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "sim")]
+    #[case(Person::Second, Number::Singular, "sīs")]
+    #[case(Person::Third, Number::Singular, "sit")]
+    #[case(Person::First, Number::Plural, "sīmus")]
+    #[case(Person::Second, Number::Plural, "sītis")]
+    #[case(Person::Third, Number::Plural, "sint")]
+    fn test_conj_pres_subj_act_sum(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+        verb: Verb,
+    ) {
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Present,
+            mood: Mood::Subjunctive,
+            voice: Voice::Active,
+        };
+
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "fuerim")]
+    #[case(Person::Second, Number::Singular, "fueris")]
+    #[case(Person::Third, Number::Singular, "fuerit")]
+    #[case(Person::First, Number::Plural, "fuerimus")]
+    #[case(Person::Second, Number::Plural, "fueritis")]
+    #[case(Person::Third, Number::Plural, "fuerint")]
+    fn test_conj_perf_subj_act_sum(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+        verb: Verb,
+    ) {
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Perfect,
+            mood: Mood::Subjunctive,
+            voice: Voice::Active,
+        };
+
+        let result = vi.conjugate();
+        assert_eq!(expected, result)
     }
 }
