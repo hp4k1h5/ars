@@ -3,6 +3,7 @@ pub mod adjective;
 pub mod noun;
 pub mod preposition;
 pub mod verb;
+pub mod word;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Number {

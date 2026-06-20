@@ -20,6 +20,10 @@ pub mod sql_types {
     #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "grammatical_case"))]
     pub struct GrammaticalCase;
+
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "latin_pos"))]
+    pub struct LatinPos;
 }
 
 diesel::table! {
@@ -32,6 +36,14 @@ diesel::table! {
         f -> Varchar,
         m -> Varchar,
         n -> Varchar,
+    }
+}
+
+diesel::table! {
+    latin_lookup (id) {
+        id -> Uuid,
+        form -> Varchar,
+        paths -> Nullable<Array<Nullable<Text>>>,
     }
 }
 
@@ -74,9 +86,27 @@ diesel::table! {
     }
 }
 
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::LatinPos;
+
+    latin_words (id) {
+        id -> Uuid,
+        pos -> LatinPos,
+    }
+}
+
+diesel::joinable!(latin_adjectives -> latin_words (id));
+diesel::joinable!(latin_lookup -> latin_words (id));
+diesel::joinable!(latin_nouns -> latin_words (id));
+diesel::joinable!(latin_prepositions -> latin_words (id));
+diesel::joinable!(latin_verbs -> latin_words (id));
+
 diesel::allow_tables_to_appear_in_same_query!(
     latin_adjectives,
+    latin_lookup,
     latin_nouns,
     latin_prepositions,
     latin_verbs,
+    latin_words,
 );

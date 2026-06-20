@@ -3,7 +3,7 @@ CREATE TYPE adj_declension AS ENUM (
 );
 
 CREATE TABLE latin_adjectives (
-	id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+	id UUID PRIMARY KEY REFERENCES latin_words(id),
 	declension adj_declension NOT NULL,
 	f VARCHAR NOT NULL,
 	m VARCHAR NOT NULL,

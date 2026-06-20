@@ -1,18 +1,6 @@
 // use crate::grammar::latin::*;
 // use std::collections::HashMap;
 
-/// Parts of Speech
-pub enum PoS {
-    NOUN,
-    PRONOUN,
-    ADJECTIVE,
-    VERB,
-    ADVERB,
-    CONJUNCTION,
-    PREPOSITION,
-    INTERJECTION,
-}
-
 #[derive(Debug, Hash, Eq, PartialEq)]
 pub enum WordOrder {
     SOV,
@@ -21,11 +9,6 @@ pub enum WordOrder {
     VOS,
     SVO,
     VSO,
-}
-
-pub enum Noun {
-    NounI,
-    NounII,
 }
 
 #[derive(Debug)]
@@ -43,10 +26,10 @@ pub struct Sentence {
 //     static ref WordOrderDistribution: HashMap<&WordOrder, f32> = HashMap::from([
 //         (&WordOrder::SOV, 0.63),
 //         (&WordOrder::OSV, 0.21),
-//         (&WordOrder::OVS, 0.6),
-//         (&WordOrder::VOS, 0.5),
-//         (&WordOrder::SVO, 0.4),
-//         (&WordOrder::VSO, 0.1),
+//         (&WordOrder::OVS, 0.06),
+//         (&WordOrder::VOS, 0.05),
+//         (&WordOrder::SVO, 0.04),
+//         (&WordOrder::VSO, 0.01),
 //     ]);
 // };
 

@@ -217,7 +217,7 @@ impl VerbInstance<'_> {
     fn get_stem_vowel(&self) -> String {
         let (stem_vowel_ind, stem_vowel_sub) = self.match_stem_vowel();
         if [Tense::Perfect, Tense::Pluperfect, Tense::FuturePerfect].contains(&self.tense) {
-            if (self.verb.is_deponent() || self.voice == Voice::Passive) {
+            if self.verb.is_deponent() || self.voice == Voice::Passive {
                 return " ".to_string();
             } else {
                 return "".to_string();

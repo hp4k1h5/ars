@@ -1,14 +1,15 @@
 use crate::{
-    api::{app::AppState, latin::prepositions, unaccent},
+    api::{app::AppState, unaccent},
     establish_cnx,
     grammar::latin::{
         noun::Case,
         preposition::{NewPreposition, Preposition},
+        word::{self, LatinPos},
     },
     schema::latin_prepositions,
 };
 use axum::{
-    extract::{Path, Query, State},
+    extract::{Path, State},
     http::StatusCode,
     response::Json,
 };
@@ -16,8 +17,6 @@ use diesel::prelude::*;
 
 use diesel::prelude::SelectableHelper;
 use diesel::{PgConnection, RunQueryDsl};
-use serde::Deserialize;
-use strum::IntoEnumIterator;
 use uuid::Uuid;
 
 pub fn create_latin_preposition(
@@ -25,13 +24,19 @@ pub fn create_latin_preposition(
     word: &str,
     cases: &[Case],
 ) -> Result<Preposition, diesel::result::Error> {
+    let word_id = word::create_latin_word(cnx, LatinPos::Preposition)?;
+
     let new_prep = NewPreposition {
         word: word.to_string(),
         cases: cases.to_vec(),
     };
 
     diesel::insert_into(latin_prepositions::table)
-        .values(&new_prep)
+        .values((
+            latin_prepositions::id.eq(word_id),
+            latin_prepositions::word.eq(&new_prep.word),
+            latin_prepositions::cases.eq(&new_prep.cases),
+        ))
         .returning(Preposition::as_returning())
         .get_result(cnx)
 }

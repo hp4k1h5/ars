@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS latin_words;
+DROP TYPE IF EXISTS latin_pos;

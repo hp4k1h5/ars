@@ -9,7 +9,7 @@ CREATE TYPE gender AS ENUM (
 );
 
 CREATE TABLE latin_nouns (
-	id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+	id UUID PRIMARY KEY REFERENCES latin_words(id),
 	declension declension NOT NULL,
 	nominative VARCHAR NOT NULL,
 	genitive VARCHAR NOT NULL,

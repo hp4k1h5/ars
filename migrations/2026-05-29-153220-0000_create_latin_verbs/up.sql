@@ -3,7 +3,7 @@ CREATE TYPE conjugation AS ENUM (
 );
 
 CREATE TABLE latin_verbs (
-	id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+	id UUID PRIMARY KEY REFERENCES latin_words(id),
 	conjugation conjugation NOT NULL,
 	present VARCHAR NOT NULL,
 	infinitive VARCHAR NOT NULL,
