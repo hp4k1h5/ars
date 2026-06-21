@@ -42,8 +42,9 @@ diesel::table! {
 diesel::table! {
     latin_lookup (id) {
         id -> Uuid,
+        word -> Uuid,
         form -> Varchar,
-        paths -> Nullable<Array<Nullable<Text>>>,
+        path -> Varchar,
     }
 }
 
@@ -68,7 +69,7 @@ diesel::table! {
     latin_prepositions (id) {
         id -> Uuid,
         word -> Varchar,
-        cases -> Array<GrammaticalCase>,
+        cases -> Array<Nullable<GrammaticalCase>>,
     }
 }
 
@@ -97,7 +98,7 @@ diesel::table! {
 }
 
 diesel::joinable!(latin_adjectives -> latin_words (id));
-diesel::joinable!(latin_lookup -> latin_words (id));
+diesel::joinable!(latin_lookup -> latin_words (word));
 diesel::joinable!(latin_nouns -> latin_words (id));
 diesel::joinable!(latin_prepositions -> latin_words (id));
 diesel::joinable!(latin_verbs -> latin_words (id));

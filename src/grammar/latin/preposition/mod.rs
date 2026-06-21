@@ -1,10 +1,29 @@
 use crate::grammar::latin::noun::Case;
-
 use crate::schema::latin_prepositions::{self};
+use crate::schema::sql_types::GrammaticalCase;
 
 use diesel::prelude::*;
 use serde::Deserialize;
 use uuid::Uuid;
+
+impl diesel::deserialize::FromSql<diesel::sql_types::Nullable<GrammaticalCase>, diesel::pg::Pg>
+    for Case
+{
+    fn from_sql(
+        bytes: diesel::pg::PgValue<'_>,
+    ) -> diesel::deserialize::Result<Self> {
+        <Case as diesel::deserialize::FromSql<GrammaticalCase, diesel::pg::Pg>>::from_sql(bytes)
+    }
+
+    fn from_nullable_sql(bytes: Option<diesel::pg::PgValue<'_>>) -> diesel::deserialize::Result<Self> {
+        match bytes {
+            Some(bytes) => {
+                <Case as diesel::deserialize::FromSql<GrammaticalCase, diesel::pg::Pg>>::from_sql(bytes)
+            }
+            None => Err("Unexpected null for Case".into()),
+        }
+    }
+}
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Clone, Queryable, Selectable)]
 #[diesel(table_name = latin_prepositions)]
