@@ -7,4 +7,5 @@ hooks = [{ id = "trailing-whitespace" }]
 repo = "local"
 hooks = [
   { id = "cargo-check", name = "cargo check", entry = "cargo check", language = "system", pass_filenames = false },
+  { id = "cargo-format", name = "cargo fmt", entry = "cargo fmt", language = "system", pass_filenames = false },
 ]

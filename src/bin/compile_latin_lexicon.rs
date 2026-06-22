@@ -95,9 +95,8 @@ fn compile_verbs(cnx: &mut PgConnection) -> Result<(), Box<dyn Error>> {
                             };
 
                             let conjugated = instance.conjugate();
-                            let bitmap = path::encode_verb(
-                                *person, *number, *tense, *mood, *voice, false,
-                            );
+                            let bitmap =
+                                path::encode_verb(*person, *number, *tense, *mood, *voice, false);
 
                             insert_lookup(cnx, verb_id, &conjugated, bitmap)?;
                         }

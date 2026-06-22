@@ -36,8 +36,10 @@ async fn main() {
         .route("/latin/verbs", get(search_verbs))
         .route("/latin/verbs/{verb}/conjugate", get(conjugate_verb));
 
-    let prepositions_routes = Router::new()
-        .route("/latin/prepositions/{preposition}", get(search_prepositions));
+    let prepositions_routes = Router::new().route(
+        "/latin/prepositions/{preposition}",
+        get(search_prepositions),
+    );
 
     let app = Router::new()
         .route("/", get(root))
@@ -54,7 +56,9 @@ async fn main() {
 
     info!("Server listening on {}", listener.local_addr().unwrap());
 
-    axum::serve(listener, app.into_make_service()).await.unwrap();
+    axum::serve(listener, app.into_make_service())
+        .await
+        .unwrap();
 }
 
 async fn root() -> &'static str {

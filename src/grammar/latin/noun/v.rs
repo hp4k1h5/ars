@@ -113,4 +113,3 @@ mod tests {
         assert_eq!(ni.decline(), expected);
     }
 }
-
