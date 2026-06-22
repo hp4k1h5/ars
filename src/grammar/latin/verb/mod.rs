@@ -31,14 +31,14 @@ pub enum Conjugation {
     Esse = 6,
 }
 
-#[derive(Debug, Display, EnumString, Clone, Copy, PartialEq)]
+#[derive(Debug, Display, EnumString, Clone, Copy, PartialEq, serde::Serialize)]
 pub enum Person {
     First,
     Second,
     Third,
 }
 
-#[derive(Debug, Display, EnumString, Clone, Copy, PartialEq)]
+#[derive(Debug, Display, EnumString, Clone, Copy, PartialEq, serde::Serialize)]
 pub enum Tense {
     Present,
     Imperfect,
@@ -48,14 +48,14 @@ pub enum Tense {
     FuturePerfect,
 }
 
-#[derive(Debug, Display, EnumString, Clone, Copy, PartialEq)]
+#[derive(Debug, Display, EnumString, Clone, Copy, PartialEq, serde::Serialize)]
 pub enum Mood {
     Indicative,
     Subjunctive,
     Imperative,
 }
 
-#[derive(Debug, Display, EnumString, Clone, Copy, PartialEq)]
+#[derive(Debug, Display, EnumString, Clone, Copy, PartialEq, serde::Serialize)]
 pub enum Voice {
     Active,
     Passive,

@@ -2,10 +2,12 @@ use crate::{
     api::{app::AppState, unaccent},
     establish_cnx,
     grammar::latin::{
+        Number,
         adjective::{AdjDeclension, Adjective},
         noun::{Case, Declension, Gender, Noun},
+        path,
         preposition::Preposition,
-        verb::{Conjugation, Verb},
+        verb::{Conjugation, Mood, Person, Tense, Verb, Voice},
         word::{self, LatinPos, LatinWord},
     },
     schema::{
@@ -40,7 +42,14 @@ pub enum WordResult {
         perfect: String,
         supine: Option<String>,
         form: String,
-        path: String,
+        #[serde(skip)]
+        path: i32,
+        person: Person,
+        number: Number,
+        tense: Tense,
+        mood: Mood,
+        voice: Voice,
+        infinitive_flag: bool,
     },
     Noun {
         id: Uuid,
@@ -49,7 +58,10 @@ pub enum WordResult {
         genitive: String,
         gender: Gender,
         form: String,
-        path: String,
+        #[serde(skip)]
+        path: i32,
+        case: Case,
+        number: Number,
     },
     Adjective {
         id: Uuid,
@@ -58,26 +70,29 @@ pub enum WordResult {
         m: String,
         n: String,
         form: String,
-        path: String,
+        #[serde(skip)]
+        path: i32,
+        case: Case,
+        number: Number,
+        gender: Gender,
     },
     Preposition {
         id: Uuid,
         word: String,
         cases: Vec<Case>,
         form: String,
-        path: String,
+        #[serde(skip)]
+        path: i32,
     },
 }
 
-pub async fn lookup_word(
-    State(_state): State<AppState>,
-    Path(word): Path<String>,
-) -> Result<Json<Vec<WordResult>>, StatusCode> {
-    let mut cnx = establish_cnx();
-
-    let limit = 10;
-    let lookups: Vec<(Uuid, Uuid, String, String)> = latin_lookup::table
-        .filter(unaccent(latin_lookup::form).eq(unaccent(&word)))
+pub fn lookup_word_cnx(
+    cnx: &mut PgConnection,
+    word: &str,
+    limit: i64,
+) -> Result<Vec<WordResult>, diesel::result::Error> {
+    let lookups: Vec<(Uuid, Uuid, String, i32)> = latin_lookup::table
+        .filter(unaccent(latin_lookup::form).eq(unaccent(word)))
         .limit(limit)
         .select((
             latin_lookup::id,
@@ -85,24 +100,23 @@ pub async fn lookup_word(
             latin_lookup::form,
             latin_lookup::path,
         ))
-        .load(&mut cnx)
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        .load(cnx)?;
 
     let mut results = Vec::new();
-    for (_lookup_id, word_id, form, path) in lookups {
+    for (_lookup_id, word_id, form, path_val) in lookups {
         let lw = latin_words::table
             .filter(latin_words::id.eq(word_id))
             .select(LatinWord::as_select())
-            .first(&mut cnx)
-            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+            .first(cnx)?;
 
         match lw.pos {
             LatinPos::Verb => {
                 if let Ok(verb) = latin_verbs::table
                     .filter(latin_verbs::id.eq(word_id))
                     .select(Verb::as_select())
-                    .first(&mut cnx)
+                    .first(cnx)
                 {
+                    let (person, number, tense, mood, voice, inf) = path::decode_verb(path_val);
                     results.push(WordResult::Verb {
                         id: verb.id.expect("Verb has no id"),
                         conjugation: verb.conjugation,
@@ -111,7 +125,13 @@ pub async fn lookup_word(
                         perfect: verb.perfect,
                         supine: verb.supine,
                         form,
-                        path,
+                        path: path_val,
+                        person,
+                        number,
+                        tense,
+                        mood,
+                        voice,
+                        infinitive_flag: inf,
                     });
                 }
             }
@@ -119,8 +139,9 @@ pub async fn lookup_word(
                 if let Ok(noun) = latin_nouns::table
                     .filter(latin_nouns::id.eq(word_id))
                     .select(Noun::as_select())
-                    .first(&mut cnx)
+                    .first(cnx)
                 {
+                    let (case, number) = path::decode_noun(path_val);
                     results.push(WordResult::Noun {
                         id: noun.id.expect("Noun has no id"),
                         declension: noun.declension,
@@ -128,7 +149,9 @@ pub async fn lookup_word(
                         genitive: noun.genitive,
                         gender: noun.gender,
                         form,
-                        path,
+                        path: path_val,
+                        case,
+                        number,
                     });
                 }
             }
@@ -136,8 +159,9 @@ pub async fn lookup_word(
                 if let Ok(adj) = latin_adjectives::table
                     .filter(latin_adjectives::id.eq(word_id))
                     .select(Adjective::as_select())
-                    .first(&mut cnx)
+                    .first(cnx)
                 {
+                    let (gender, case, number) = path::decode_adjective(path_val);
                     results.push(WordResult::Adjective {
                         id: adj.id.expect("Adjective has no id"),
                         declension: adj.declension,
@@ -145,7 +169,10 @@ pub async fn lookup_word(
                         m: adj.m,
                         n: adj.n,
                         form,
-                        path,
+                        path: path_val,
+                        case,
+                        number,
+                        gender,
                     });
                 }
             }
@@ -153,14 +180,14 @@ pub async fn lookup_word(
                 if let Ok(prep) = latin_prepositions::table
                     .filter(latin_prepositions::id.eq(word_id))
                     .select(Preposition::as_select())
-                    .first(&mut cnx)
+                    .first(cnx)
                 {
                     results.push(WordResult::Preposition {
                         id: prep.id.expect("Preposition has no id"),
                         word: prep.word,
                         cases: prep.cases,
                         form,
-                        path,
+                        path: path_val,
                     });
                 }
             }
@@ -168,6 +195,16 @@ pub async fn lookup_word(
         }
     }
 
+    Ok(results)
+}
+
+pub async fn lookup_word(
+    State(_state): State<AppState>,
+    Path(word): Path<String>,
+) -> Result<Json<Vec<WordResult>>, StatusCode> {
+    let mut cnx = establish_cnx();
+    let results =
+        lookup_word_cnx(&mut cnx, &word, 10).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     Ok(Json(results))
 }
 

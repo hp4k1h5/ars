@@ -1,9 +1,10 @@
 /// Iterate over all latin_db entries, conjugate or decline every form. Store in latin_lookup with
-/// space-separated path
+/// bitmap path encoding
 use ars::establish_cnx;
 use ars::grammar::latin::Number;
 use ars::grammar::latin::adjective::{Adjective, AdjectiveInstance};
 use ars::grammar::latin::noun::{Case, Gender, Noun, NounInstance};
+use ars::grammar::latin::path;
 use ars::grammar::latin::preposition::Preposition;
 use ars::grammar::latin::verb::{Mood, Person, Tense, Verb, VerbInstance, Voice};
 use ars::schema::{latin_adjectives, latin_lookup, latin_nouns, latin_prepositions, latin_verbs};
@@ -17,7 +18,7 @@ use uuid::Uuid;
 struct NewLookupEntry {
     word: Uuid,
     form: String,
-    path: String,
+    path: i32,
 }
 
 pub fn main() -> Result<(), Box<dyn Error>> {
@@ -35,12 +36,12 @@ fn insert_lookup(
     cnx: &mut PgConnection,
     word_id: Uuid,
     form: &str,
-    path: &str,
+    path_val: i32,
 ) -> Result<(), Box<dyn Error>> {
     let entry = NewLookupEntry {
         word: word_id,
         form: form.to_string(),
-        path: path.to_string(),
+        path: path_val,
     };
 
     diesel::insert_into(latin_lookup::table)
@@ -94,12 +95,11 @@ fn compile_verbs(cnx: &mut PgConnection) -> Result<(), Box<dyn Error>> {
                             };
 
                             let conjugated = instance.conjugate();
-                            let path = format!(
-                                "{:?} {:?} {:?} {:?} {:?}",
-                                tense, voice, mood, person, number
+                            let bitmap = path::encode_verb(
+                                *person, *number, *tense, *mood, *voice, false,
                             );
 
-                            insert_lookup(cnx, verb_id, &conjugated, &path)?;
+                            insert_lookup(cnx, verb_id, &conjugated, bitmap)?;
                         }
                     }
                 }
@@ -122,9 +122,16 @@ fn compile_verbs(cnx: &mut PgConnection) -> Result<(), Box<dyn Error>> {
                 };
 
                 let inf = instance.infinitive();
-                let path = format!("{:?} {:?} Infinitive", tense, voice);
+                let bitmap = path::encode_verb(
+                    Person::First,
+                    Number::Singular,
+                    tense,
+                    Mood::Indicative,
+                    *voice,
+                    true,
+                );
 
-                insert_lookup(cnx, verb_id, &inf, &path)?;
+                insert_lookup(cnx, verb_id, &inf, bitmap)?;
             }
         }
     }
@@ -150,9 +157,9 @@ fn compile_nouns(cnx: &mut PgConnection) -> Result<(), Box<dyn Error>> {
                 };
 
                 let declined = instance.decline();
-                let path = format!("{:?} {:?}", case, number);
+                let bitmap = path::encode_noun(case, *number);
 
-                insert_lookup(cnx, noun_id, &declined, &path)?;
+                insert_lookup(cnx, noun_id, &declined, bitmap)?;
             }
         }
     }
@@ -169,8 +176,8 @@ fn compile_prepositions(cnx: &mut PgConnection) -> Result<(), Box<dyn Error>> {
         let prep_id = prep.id.expect("Preposition has no id");
         println!("Processing preposition: {}, ID: {}", prep.word, prep_id);
 
-        let path = "";
-        insert_lookup(cnx, prep_id, &prep.word, path)?;
+        let bitmap = path::encode_preposition();
+        insert_lookup(cnx, prep_id, &prep.word, bitmap)?;
     }
 
     Ok(())
@@ -202,9 +209,9 @@ fn compile_adjectives(cnx: &mut PgConnection) -> Result<(), Box<dyn Error>> {
                     };
 
                     let declined = instance.decline();
-                    let path = format!("{:?} {:?} {:?}", gender, case, number);
+                    let bitmap = path::encode_adjective(*gender, case, *number);
 
-                    insert_lookup(cnx, adj_id, &declined, &path)?;
+                    insert_lookup(cnx, adj_id, &declined, bitmap)?;
                 }
             }
         }

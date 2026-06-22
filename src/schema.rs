@@ -44,7 +44,7 @@ diesel::table! {
         id -> Uuid,
         word -> Uuid,
         form -> Varchar,
-        path -> Varchar,
+        path -> Int4,
     }
 }
 
