@@ -1,0 +1,19 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/nephele/nephele:$TAG_NAME'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/nephele/nephele:latest'
+      - '-f'
+      - Dockerfile
+      - '.'
+
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/nephele/nephele:$TAG_NAME'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/nephele/nephele:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_HIGHCPU_8
