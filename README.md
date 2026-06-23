@@ -28,6 +28,15 @@ Eventually, there will be a database of lexical items for any language, but ther
 
 ## Ars server
 
+### environment variables
+The following environment variables should be set to interact with the
+database. A `.env.{ARS_ENV}` may be used.
+
+```bash
+ARS_ENV=dev
+ARS_DB_URL='postgres://user:pw@host:port/ars'
+```
+
 #### local development
 
 ```bash

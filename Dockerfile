@@ -24,13 +24,12 @@ RUN cargo build --release --bin server
 # -------------------------------
 FROM debian:bullseye-slim AS runtime
 
-ARG ARS_ENV
-ARG DATABASE_URL
-ENV PORT=7357
+ARG ARS_ENV \
+    ARS_DB_URL
+ENV PORT=7357 \
+    RUST_LOG=debug
 
 WORKDIR /app
-RUN mkdir .env
-COPY .env/$ARS_ENV .env/
 COPY --from=builder /app/target/release/server /app/ars_server
 
 EXPOSE $PORT
