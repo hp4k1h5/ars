@@ -3,6 +3,7 @@ target/
 
 # Git
 .git/
+.github/
 .gitignore
 
 # Docker
@@ -24,4 +25,4 @@ Thumbs.db
 **/*.rs.bk
 
 # Environment
-.env
+# .env

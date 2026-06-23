@@ -17,7 +17,7 @@ use diesel::prelude::*;
 
 use diesel::prelude::SelectableHelper;
 use diesel::{PgConnection, RunQueryDsl};
-use uuid::Uuid;
+// use uuid::Uuid;
 
 pub fn create_latin_preposition(
     cnx: &mut PgConnection,

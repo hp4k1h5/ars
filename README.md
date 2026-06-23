@@ -25,19 +25,21 @@ The utility is not immediately apparent. For instance, writing ten lines of rust
 
 Eventually, there will be a database of lexical items for any language, but there will probably be several experimental trials over the type of database (vector vs graph) and vendor. Some considerations include search retrieval of terms across languages and semantic proximity of terms across any language.
 
-### Usage
 
-```rust
+## Ars server
 
-use ars::grammar::latin::noun::*;
+#### local development
 
-let = Noun(Declension.I, "puella", "puellae")
+```bash
+cargo run --bin server
 ```
 
+#### docker
 
-### RFC
-
-Proposal
-```rust
-let sentence = Sentence("")
+```bash
+docker run \
+  -p 7357:7357 \
+  -p 5432:5432 \
+  --env-file .env/dev \
+  ars:latest
 ```

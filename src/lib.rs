@@ -1,5 +1,4 @@
 use diesel::{Connection, PgConnection};
-use dotenvy::dotenv;
 use std::env;
 
 pub mod api;

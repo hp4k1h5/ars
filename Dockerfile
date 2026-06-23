@@ -1,34 +1,38 @@
-# ── build stage ──
-FROM rust:1.89-alpine AS builder
-
-ENV ARS_ENV=prod
-
-RUN apk add --no-cache \
-	musl-dev \
-	perl \
-	make \
-	openssl-dev
+# STAGE 1: Compute dependency recipe
+# -------------------------------
+FROM rust:1.96-bullseye AS planner
 
 WORKDIR /app
+COPY . .
+RUN cargo install cargo-chef
+RUN cargo chef prepare --recipe-path recipe.json
 
-COPY Cargo.toml Cargo.lock ./
-COPY src/ src/
-COPY migrations/ migrations/
-COPY diesel.toml ./
+# STAGE 2: Build dependencies and API binary
+# -------------------------------
+FROM rust:1.96-bullseye AS builder
 
+WORKDIR /app
+COPY --from=planner /app/recipe.json recipe.json
+RUN cargo install cargo-chef
+# Build and cache dependencies
+RUN cargo chef cook --release --recipe-path recipe.json
+# Copy actual source code and compile the real binary
+COPY . .
 RUN cargo build --release --bin server
 
-RUN rm -rf /var/cache/apk/*
+# STAGE 3: Minimal runtime image
+# -------------------------------
+FROM debian:bullseye-slim AS runtime
 
-COPY migrations/ /migrations/
-COPY diesel.toml /diesel.toml
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
+ARG ARS_ENV
 ARG DATABASE_URL
 ENV PORT=7357
 
-EXPOSE 7357
+WORKDIR /app
+RUN mkdir .env
+COPY .env/$ARS_ENV .env/
+COPY --from=builder /app/target/release/server /app/ars_server
 
-ENTRYPOINT ["docker-entrypoint.sh"]
+EXPOSE $PORT
+
+CMD ["./ars_server"]
