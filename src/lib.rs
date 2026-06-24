@@ -14,6 +14,6 @@ pub fn establish_cnx() -> PgConnection {
         Err(_) => println!("No {} file found, relying on system environment", env_file),
     }
 
-    let db_url = env::var("ARS_DB_URL").expect("ARS_DB_URL must be set");
+    let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     PgConnection::establish(&db_url).unwrap_or_else(|_| panic!("Error connecting to {}", db_url))
 }

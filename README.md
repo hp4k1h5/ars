@@ -1,3 +1,10 @@
+---
+title: "ars/README.md"
+date: 2026-06-23
+bibliography: ./ref/bibliography/bibliography.bib
+---
+
+
 # A.rs
 
 A language library
@@ -34,7 +41,7 @@ database. A `.env.{ARS_ENV}` may be used.
 
 ```bash
 ARS_ENV=dev
-ARS_DB_URL='postgres://user:pw@host:port/ars'
+DATABASE_URL='postgres://user:pw@host:port/ars'
 ```
 
 #### local development
