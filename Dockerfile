@@ -25,7 +25,7 @@ RUN cargo build --release --bin server
 FROM debian:bullseye-slim AS runtime
 
 ARG ARS_ENV \
-   DATABASE_URL \
+   DATABASE_URL
 ENV PORT=7357 \
     RUST_LOG=debug
 

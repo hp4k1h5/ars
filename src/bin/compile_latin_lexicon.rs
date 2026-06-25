@@ -32,22 +32,14 @@ pub fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn insert_lookup(
+fn insert_lookups(
     cnx: &mut PgConnection,
-    word_id: Uuid,
-    form: &str,
-    path_val: i32,
+    entries: Vec<NewLookupEntry>,
 ) -> Result<(), Box<dyn Error>> {
-    let entry = NewLookupEntry {
-        word: word_id,
-        form: form.to_string(),
-        path: path_val,
-    };
-
+    tracing::info!("Inserting {} entries", entries.len());
     diesel::insert_into(latin_lookup::table)
-        .values(&entry)
+        .values(entries)
         .execute(cnx)?;
-
     Ok(())
 }
 
@@ -68,6 +60,7 @@ fn compile_verbs(cnx: &mut PgConnection) -> Result<(), Box<dyn Error>> {
     let active_passive = [Voice::Active, Voice::Passive];
 
     for verb in &verbs {
+        let mut entries: Vec<NewLookupEntry> = vec![];
         let verb_id = verb.id.expect("Verb has no id");
         println!("Processing verb: {}, ID: {}", verb.present, verb_id);
 
@@ -95,10 +88,13 @@ fn compile_verbs(cnx: &mut PgConnection) -> Result<(), Box<dyn Error>> {
                             };
 
                             let conjugated = instance.conjugate();
-                            let bitmap =
-                                path::encode_verb(*person, *number, *tense, *mood, *voice, false);
+                            let bitmap = path::encode_verb(instance, false);
 
-                            insert_lookup(cnx, verb_id, &conjugated, bitmap)?;
+                            entries.push(NewLookupEntry {
+                                word: verb_id,
+                                form: conjugated.to_string(),
+                                path: bitmap,
+                            });
                         }
                     }
                 }
@@ -119,22 +115,18 @@ fn compile_verbs(cnx: &mut PgConnection) -> Result<(), Box<dyn Error>> {
                     mood: Mood::Indicative,
                     voice: *voice,
                 };
+                let infinitive = instance.infinitive();
 
-                let inf = instance.infinitive();
-                let bitmap = path::encode_verb(
-                    Person::First,
-                    Number::Singular,
-                    tense,
-                    Mood::Indicative,
-                    *voice,
-                    true,
-                );
-
-                insert_lookup(cnx, verb_id, &inf, bitmap)?;
+                let bitmap = path::encode_verb(instance, true);
+                entries.push(NewLookupEntry {
+                    word: verb_id,
+                    form: infinitive,
+                    path: bitmap,
+                });
             }
         }
+        insert_lookups(cnx, entries)?;
     }
-
     Ok(())
 }
 
@@ -144,6 +136,7 @@ fn compile_nouns(cnx: &mut PgConnection) -> Result<(), Box<dyn Error>> {
     let numbers = [Number::Singular, Number::Plural];
 
     for noun in &nouns {
+        let mut entries: Vec<NewLookupEntry> = vec![];
         let noun_id = noun.id.expect("Noun has no id");
         println!("Processing noun: {}, ID: {}", noun.nominative, noun_id);
 
@@ -154,15 +147,17 @@ fn compile_nouns(cnx: &mut PgConnection) -> Result<(), Box<dyn Error>> {
                     case,
                     number: *number,
                 };
-
                 let declined = instance.decline();
                 let bitmap = path::encode_noun(case, *number);
-
-                insert_lookup(cnx, noun_id, &declined, bitmap)?;
+                entries.push(NewLookupEntry {
+                    word: noun_id,
+                    form: declined,
+                    path: bitmap,
+                });
             }
         }
+        insert_lookups(cnx, entries)?;
     }
-
     Ok(())
 }
 
@@ -171,14 +166,19 @@ fn compile_prepositions(cnx: &mut PgConnection) -> Result<(), Box<dyn Error>> {
         .select(Preposition::as_select())
         .load(cnx)?;
 
+    let mut entries = vec![];
     for prep in &preps {
         let prep_id = prep.id.expect("Preposition has no id");
         println!("Processing preposition: {}, ID: {}", prep.word, prep_id);
 
         let bitmap = path::encode_preposition();
-        insert_lookup(cnx, prep_id, &prep.word, bitmap)?;
+        entries.push(NewLookupEntry {
+            word: prep_id,
+            form: prep.word.clone(),
+            path: bitmap,
+        });
     }
-
+    insert_lookups(cnx, entries)?;
     Ok(())
 }
 
@@ -191,6 +191,7 @@ fn compile_adjectives(cnx: &mut PgConnection) -> Result<(), Box<dyn Error>> {
     let genders = [Gender::Feminine, Gender::Masculine, Gender::Neuter];
 
     for adj in &adjectives {
+        let mut entries: Vec<NewLookupEntry> = vec![];
         let adj_id = adj.id.expect("Adjective has no id");
         println!(
             "Processing adjective: {}/{}/{}, ID: {}",
@@ -209,11 +210,16 @@ fn compile_adjectives(cnx: &mut PgConnection) -> Result<(), Box<dyn Error>> {
 
                     let declined = instance.decline();
                     let bitmap = path::encode_adjective(*gender, case, *number);
-
-                    insert_lookup(cnx, adj_id, &declined, bitmap)?;
+                    entries.push(NewLookupEntry {
+                        word: adj_id,
+                        form: declined,
+                        path: bitmap,
+                    });
                 }
             }
         }
+
+        insert_lookups(cnx, entries)?;
     }
 
     Ok(())

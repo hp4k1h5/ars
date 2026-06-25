@@ -1,4 +1,5 @@
 use crate::grammar::latin::verb::*;
+use unaccent::unaccent as local_unaccent;
 
 impl VerbInstance<'_> {
     fn get_stem_esse(&self) -> String {
@@ -11,6 +12,7 @@ impl VerbInstance<'_> {
                 (Person::First, _) | (Person::Third, Number::Plural) => "su".to_string(),
                 _ => "es".to_string(),
             },
+            (Tense::Imperfect, Mood::Subjunctive) => self.verb.infinitive.chars().take(3).collect(),
             (Tense::Imperfect | Tense::Future, _) => "er".to_string(),
             (Tense::Perfect, _) => "fu".to_string(),
             _ => "".to_string(),
@@ -44,10 +46,15 @@ impl VerbInstance<'_> {
     }
 
     fn get_stem_vowel_esse(&self) -> String {
+        let vowel = match self.mood {
+            Mood::Indicative => "ā".to_string(),
+            Mood::Subjunctive => "ē".to_string(),
+            _ => "".to_string(),
+        };
         match self.tense {
             Tense::Imperfect => match (self.person, self.number) {
-                (Person::First, Number::Singular) | (Person::Third, _) => "a".to_string(),
-                _ => "ā".to_string(),
+                (Person::First, Number::Singular) | (Person::Third, _) => local_unaccent(vowel),
+                _ => vowel,
             },
             Tense::Future => match (self.person, self.number) {
                 (Person::First, Number::Singular) | (Person::Third, Number::Plural) => {
@@ -220,6 +227,32 @@ mod tests {
             person,
             number,
             tense: Tense::Present,
+            mood: Mood::Subjunctive,
+            voice: Voice::Active,
+        };
+
+        let result = vi.conjugate();
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "essem")]
+    #[case(Person::Second, Number::Singular, "essēs")]
+    #[case(Person::Third, Number::Singular, "esset")]
+    #[case(Person::First, Number::Plural, "essēmus")]
+    #[case(Person::Second, Number::Plural, "essētis")]
+    #[case(Person::Third, Number::Plural, "essent")]
+    fn test_conj_impf_subj_act_sum(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+        verb: Verb,
+    ) {
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Imperfect,
             mood: Mood::Subjunctive,
             voice: Voice::Active,
         };

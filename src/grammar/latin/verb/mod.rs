@@ -144,11 +144,10 @@ impl VerbInstance<'_> {
         let ending = match (self.tense, self.voice, self.mood) {
             (Tense::Perfect, Voice::Passive, _) => &self.handle_deponent(),
             (Tense::Perfect, Voice::Active, _) => &self.perfect_helper(),
-            (Tense::Pluperfect, _, Mood::Subjunctive) => self.get_ending(),
             (Tense::Pluperfect | Tense::FuturePerfect, _, _) => &self.perfect_helper(),
             _ => self.get_ending(),
         };
-        println!("{stem} | {stem_vowel} | {infix} | {ending}  ");
+        // println!("{stem} | {stem_vowel} | {infix} | {ending}  ");
         format!("{stem}{stem_vowel}{infix}{ending}")
     }
     fn get_stem(&self) -> String {
@@ -232,14 +231,6 @@ impl VerbInstance<'_> {
         };
         match (self.mood, self.tense) {
             (Mood::Indicative, Tense::Imperfect | Tense::Future) => stem_vowel,
-            (Mood::Subjunctive, Tense::Pluperfect) => {
-                "iss".to_string()
-                    + match (self.person, self.number) {
-                        (Person::Second, _) | (Person::First, Number::Plural) => "ē",
-                        _ => "e",
-                    }
-            }
-            (_, Tense::Pluperfect | Tense::FuturePerfect) => "".to_string(),
             _ => match (self.person, self.number) {
                 (Person::Third, _) => match (self.voice, self.number) {
                     (Voice::Passive, Number::Singular) => stem_vowel,
@@ -258,13 +249,7 @@ impl VerbInstance<'_> {
 
     fn get_infix(&self) -> String {
         match (self.tense, self.mood) {
-            (Tense::Pluperfect, Mood::Subjunctive) => {
-                "iss".to_string()
-                    + match (self.person, self.number) {
-                        (Person::Second, _) | (Person::First, Number::Plural) => "ē",
-                        (_, _) => "e",
-                    }
-            }
+            (Tense::Pluperfect, Mood::Subjunctive) => "".to_string(),
             (_, Mood::Subjunctive) => "".to_string(),
             _ => match self.tense {
                 Tense::Imperfect => match (self.person, self.number) {
@@ -412,13 +397,17 @@ impl VerbInstance<'_> {
             },
 
             (Tense::Pluperfect | Tense::FuturePerfect, _) => match self.mood {
-                Mood::Subjunctive => {
-                    "iss".to_string()
-                        + match (self.person, self.number) {
-                            (Person::Second, _) | (Person::First, Number::Plural) => "ē",
-                            _ => "e",
-                        }
-                }
+                Mood::Subjunctive => match self.voice {
+                    Voice::Active => {
+                        "iss".to_string()
+                            + match (self.person, self.number) {
+                                (Person::Second, _) | (Person::First, Number::Plural) => "ē",
+                                _ => "e",
+                            }
+                            + self.get_ending()
+                    }
+                    Voice::Passive => self.esse_helper(),
+                },
                 Mood::Indicative => self.esse_helper(),
                 _ => "".to_string(),
             },

@@ -21,7 +21,7 @@ async fn main() {
     let args: Vec<String> = std::env::args().collect();
     let port = if args.len() > 1 {
         args[1].parse::<u16>().unwrap_or_else(|_| {
-            eprintln!("Invalid port number, using default {}", DEFAULT_PORT);
+            tracing::error!("Invalid port number, using default {}", DEFAULT_PORT);
             DEFAULT_PORT
         })
     } else {

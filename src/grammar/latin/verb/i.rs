@@ -491,6 +491,31 @@ mod tests {
     }
 
     #[rstest]
+    #[case(Person::First, Number::Singular, "amātum essem")]
+    #[case(Person::Second, Number::Singular, "amātum essēs")]
+    #[case(Person::Third, Number::Singular, "amātum esset")]
+    #[case(Person::First, Number::Plural, "amāta essēmus")]
+    #[case(Person::Second, Number::Plural, "amāta essētis")]
+    #[case(Person::Third, Number::Plural, "amāta essent")]
+    fn test_conj_pluperf_subj_pass_i(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+        verb: Verb,
+    ) {
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Pluperfect,
+            mood: Mood::Subjunctive,
+            voice: Voice::Passive,
+        };
+        let result = vi.conjugate();
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
     #[case(Person::Second, Number::Singular, "amā")]
     #[case(Person::Second, Number::Plural, "amāte")]
     fn test_conj_pres_imp_act_i(

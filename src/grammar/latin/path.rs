@@ -45,7 +45,7 @@ use crate::grammar::latin::noun::Case;
 use crate::grammar::latin::{
     Number,
     noun::Gender,
-    verb::{Mood, Person, Tense, Voice},
+    verb::{Mood, Person, Tense, VerbInstance, Voice},
 };
 
 // Part of Speech markers in bits 10-11
@@ -68,24 +68,17 @@ const POS_SHIFT: u32 = 10;
 /// - bit 8: voice (Active=0, Passive=1)
 /// - bit 9: infinitive flag (false=0, true=1)
 /// - bits 10-11: POS marker `00` for verb
-pub fn encode_verb(
-    person: Person,
-    number: Number,
-    tense: Tense,
-    mood: Mood,
-    voice: Voice,
-    infinitive: bool,
-) -> i32 {
-    let p = match person {
+pub fn encode_verb(verb: VerbInstance, inf: bool) -> i32 {
+    let p = match verb.person {
         Person::First => 0,
         Person::Second => 1,
         Person::Third => 2,
     };
-    let n = match number {
+    let n = match verb.number {
         Number::Singular => 0,
         Number::Plural => 1,
     };
-    let t = match tense {
+    let t = match verb.tense {
         Tense::Present => 0,
         Tense::Imperfect => 1,
         Tense::Future => 2,
@@ -93,16 +86,16 @@ pub fn encode_verb(
         Tense::Pluperfect => 4,
         Tense::FuturePerfect => 5,
     };
-    let m = match mood {
+    let m = match verb.mood {
         Mood::Indicative => 0,
         Mood::Subjunctive => 1,
         Mood::Imperative => 2,
     };
-    let v = match voice {
+    let v = match verb.voice {
         Voice::Active => 0,
         Voice::Passive => 1,
     };
-    let inf = if infinitive { 1 } else { 0 };
+    let inf = if inf { 1 } else { 0 };
     p | (n << 2) | (t << 3) | (m << 6) | (v << 8) | (inf << 9) | (POS_VERB << POS_SHIFT)
 }
 
