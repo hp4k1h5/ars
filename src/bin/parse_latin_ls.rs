@@ -396,6 +396,9 @@ fn attach_suffix(stem: &str, suffix: &str) -> String {
         (Some(&'d' | &'t'), Some(&'s' | &'t')) => {
             stem_chars.pop();
         }
+        (Some(&'g'), Some(&'s' | &'x')) => {
+            stem_chars.pop();
+        }
         (Some(a), Some(b)) if a == b => {
             suffix_chars.remove(0);
         }
