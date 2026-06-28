@@ -93,29 +93,23 @@ fn clean_orth(s: &str) -> String {
 
 /// Strip parenthetical glosses, newlines, and commas from CSV-bound fields.
 fn clean_field(s: &str) -> String {
-    let s = s
-        .trim()
-        .replace('\n', "")
-        .replace('\r', "")
-        .replace(',', "");
+    let s = s.trim().replace(['\n', '\r', ','], "");
     let s = s.as_str();
 
     // Strip parenthetical content like "(adsp-, -argō）".
     let mut out = String::new();
     let mut depth = 0u32;
     for c in s.chars() {
-        match c {
-            '(' | '（' => depth += 1,
-            ')' | '）' => {
-                if depth > 0 {
-                    depth -= 1;
-                    continue;
-                }
+        match (c, depth) {
+            ('(' | '（', _) => depth += 1,
+            (')' | '）', 1..) => {
+                depth -= 1;
+                continue;
             }
-            _ => {}
-        }
-        if depth == 0 {
-            out.push(c);
+            (_, 1..) => {}
+            (_, 0) => {
+                out.push(c);
+            }
         }
     }
     let s = out.trim().to_string();
