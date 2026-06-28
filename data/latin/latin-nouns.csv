@@ -126,14 +126,14 @@ adlocūtiō,adlocūtiōnis,f,III
 adloquium,adloquiī,n,II
 adluviō,adluviōnis,f,III
 adminiculum,adminiculī,n,II
-ad-ministra,ad-ministrae,f,I
+administra,administrae,f,I
 administrātiō,administrātiōnis,f,III
 administrātor,administrātōris,m,III
 admīrābilitās,admīrābilitātis,f,III
 admīrātiō,admīrātiōnis,f,III
 admīrātor,admīrātōris,m,III
 admissārius,admissāriī,m,II
-ad-missum,ad-missī,n,II
+admissum,admissī,n,II
 admīxtiō,admīxtiōnis,f,III
 admonitiō,admonitiōnis,f,III
 admonitor,admonitōris,m,III
@@ -310,7 +310,7 @@ Alyattēs,Alyattēseī,m,V
 amāracus,amāracī,f,II
 amarantus,amarantī,n,II
 amāror,amārōris,m,III
-Amaryllis,Amaryllisidis or idos,f,II
+Amaryllis,Amaryllisidis,f,II
 amāta,amātae,f,I
 Amathūsia,Amathūsiae,f,I
 amātor,amātōris,m,III
@@ -406,11 +406,11 @@ annus,annī,m,II
 antecessiō,antecessiōnis,f,III
 antecursor,antecursōris,m,III
 antemna,antemnae,f,I
-ante-occupātiō,ante-occupātiōnis,f,III
-ante-pēs,ante-pedis,m,III
-ante-pīlānus,ante-pīlānī,m,II
+anteoccupātiō,anteoccupātiōnis,f,III
+antepēs,antepedis,m,III
+antepīlānus,antepīlānī,m,II
 antēs,antēsīum,m,II
-ante-sīgnānus,ante-sīgnānī,m,II
+antesīgnānus,antesīgnānī,m,II
 anthias,anthiasae,m,I
 anticipātiō,anticipātiōnis,f,III
 antidotum,antidotī,n,II
@@ -672,9 +672,9 @@ bibliothēca,bibliothēcae,f,I
 bidental,bidentalālis,n,III
 bīduum,bīduī,n,II
 biennium,bienniī,n,II
-bi-lībra,bi-lībrae,f,I
+bilībra,bilībrae,f,I
 bīlis,bīlis,f,III
-bi-marītus,bi-marītī,m,II
+bimarītus,bimarītī,m,II
 binoctium,binoctiī,n,II
 bitūmen,bitūmeninis,n,III
 blandiēns,blandiēnentis,m,III
@@ -1101,7 +1101,7 @@ cōmitās,cōmitātis,f,III
 comitātus,comitātūs,m,IV
 comitiātus,comitiātūs,m,IV
 comitium,comitiī,n,II
-com-manipulāris,com-manipulāris,m,III
+commanipulāris,commanipulāris,m,III
 commeātus,commeātūs,m,IV
 commemorātiō,commemorātiōnis,f,III
 commendātiō,commendātiōnis,f,III
@@ -1113,7 +1113,7 @@ commentor,commentōris,m,III
 commentum,commentī,n,II
 commercium,commerciī,n,II
 commīlitium,commīlitiī,n,II
-com-mīlitō,com-mīlitōnis,m,III
+commīlitō,commīlitōnis,m,III
 comminātiō,comminātiōnis,f,III
 commiserātiō,commiserātiōnis,f,III
 commissiō,commissiōnis,f,III
@@ -1152,10 +1152,10 @@ complōrātus,complōrātūs,m,IV
 compositiō,compositiōnis,f,III
 compositor,compositōris,m,III
 compositum,compositī,n,II
-com-pōtātiō,com-pōtātiōnis,f,III
-com-pōtor,com-pōtōris,m,III
-com-pōtrīx,com-pōtrīīcis,f,III
-com-prānsor,com-prānsōris,m,III
+compōtātiō,compōtātiōnis,f,III
+compōtor,compōtōris,m,III
+compōtrīx,compōtrīīcis,f,III
+comprānsor,comprānsōris,m,III
 comprecātiō,comprecātiōnis,f,III
 comprehēnsiō,comprehēnsiōnis,f,III
 compressiō,compressiōnis,f,III
@@ -1164,7 +1164,7 @@ comprobātor,comprobātōris,m,III
 comprōmissum,comprōmissī,n,II
 cōnāmen,cōnāmeninis,n,III
 cōnātus,cōnātūs,m,IV
-con-caedēs,con-caedēsium,f,II
+concaedēs,concaedēsium,f,II
 concentiō,concentiōnis,f,III
 concentus,concentūs,m,IV
 conceptiō,conceptiōnis,f,III
@@ -1202,7 +1202,7 @@ condemnātiō,condemnātiōnis,f,III
 condemnātor,condemnātōris,m,III
 condīmentum,condīmentī,n,II
 condiscipulātus,condiscipulātūs,m,IV
-con-discipulus,con-discipulī,m,II
+condiscipulus,condiscipulī,m,II
 condītiō,condītiōnis,f,III
 conditor.,conditor.ōris,m,III
 condītor,condītōris,m,III
@@ -1244,14 +1244,14 @@ coniūnctum,coniūnctī,n,II
 coniūnx,coniūniugis,m,III
 coniūrātiō,coniūrātiōnis,f,III
 conlacrimātiō,conlacrimātiōnis,f,III
-con - lactea,con - lacteae,f,I
+conlactea,conlacteae,f,I
 conlātiō,conlātiōnis,f,III
 conlaudātiō,conlaudātiōnis,f,III
 conlēcta,conlēctae,f,I
 conlēctiō,conlēctiōnis,f,III
 conlēga,conlēgae,m,I
 conlēgium,conlēgiī,n,II
-con-lībertus,con-lībertī,m,II
+conlībertus,conlībertī,m,II
 conligātiō,conligātiōnis,f,III
 conlocātiō,conlocātiōnis,f,III
 conlocūtiō,conlocūtiōnis,f,III
@@ -1281,7 +1281,7 @@ cōnsequentia,cōnsequentiae,f,I
 cōnserva,cōnservae,f,I
 cōnservātiō,cōnservātiōnis,f,III
 cōnservātor,cōnservātōris,m,III
-cōn-servus,cōn-servī,m,II
+cōnservus,cōnservī,m,II
 cōnsessor,cōnsessōris,m,III
 cōnsessus,cōnsessūs,m,IV
 cōnsīdērātiō,cōnsīdērātiōnis,f,III
@@ -1296,12 +1296,12 @@ cōnsōbrīnus,cōnsōbrīnī,m,II
 cōnsociātiō,cōnsociātiōnis,f,III
 cōnsōlātiō,cōnsōlātiōnis,f,III
 cōnsōlātor,cōnsōlātōris,m,III
-cōn-sors,cōn-sorsortis,m,III
+cōnsors,cōnsorsortis,m,III
 cōnsortiō,cōnsortiōnis,f,III
 cōnsortium,cōnsortiī,n,II
 cōnspectus,cōnspectūs,m,IV
 cōnspīrātiō,cōnspīrātiōnis,f,III
-cōn-spōnsor,cōn-spōnsōris,m,III
+cōnspōnsor,cōnspōnsōris,m,III
 cōnstantia,cōnstantiae,f,I
 cōnsternātiō,cōnsternātiōnis,f,III
 cōnstitūtiō,cōnstitūtiōnis,f,III
@@ -1309,7 +1309,7 @@ cōnstitūtum,cōnstitūtī,n,II
 cōnstrūctiō,cōnstrūctiōnis,f,III
 cōnstūprātor,cōnstūprātōris,m,III
 Cōnsuālia,Cōnsuāliaium,n,II
-cōn-suāsor,cōn-suāsōris,m,III
+cōnsuāsor,cōnsuāsōris,m,III
 cōnsuētūdō,cōnsuētūdinis,f,III
 cōnsul,cōnsululis,m,III
 cōnsulātus,cōnsulātūs,m,IV
@@ -1352,8 +1352,8 @@ contumēlia,contumēliae,f,I
 conturbātiō,conturbātiōnis,f,III
 contus,contī,m,II
 cōnus,cōnī,m,II
-con - vallis,con - vallis,f,III
-con-vector,con-vectōris,m,III
+convallis,convallis,f,III
+convector,convectōris,m,III
 convenientia,convenientiae,f,I
 conventiculum,conventiculī,n,II
 conventiō,conventiōnis,f,III
@@ -1586,7 +1586,7 @@ decuriātus,decuriātūs,m,IV
 decuriō,decuriōnis,m,III
 dēcursus,dēcursūs,m,IV
 decus,decuoris,n,III
-dē-decus,dē-decuoris,n,III
+dēdecus,dēdecuoris,n,III
 dēdicātiō,dēdicātiōnis,f,III
 dēditiō,dēditiōnis,f,III
 dēductiō,dēductiōnis,f,III
@@ -1672,7 +1672,7 @@ dētrāctor,dētrāctōris,m,III
 dētrectātiō,dētrectātiōnis,f,III
 dētrectātor,dētrectātōris,m,III
 dētrīmentum,dētrīmentī,n,II
-de-ūnx,de-ūnūncis,m,III
+deūnx,deūnūncis,m,III
 deus,deī,m,II
 dēversōriolum,dēversōriolī,n,II
 dēversōrium,dēversōriī,n,II
@@ -1785,7 +1785,7 @@ disturbatiō,disturbatiōnis,f,III
 dīthyrambus,dīthyrambī,m,II
 diūturnitās,diūturnitātis,f,III
 dīva,dīvae,f,I
-dī-verbium,dī-verbiī,n,II
+dīverbium,dīverbiī,n,II
 dīversitās,dīversitātis,f,III
 dīversor,dīversōris,m,III
 dīvīnātiō,dīvīnātiōnis,f,III
@@ -1909,7 +1909,7 @@ endromis,endromidis,f,III
 ēnōdātiō,ēnōdātiōnis,f,III
 ēnsis,ēnsis,m,III
 enthȳmēma,enthȳmēmaatis,n,III
-e-numerātiō,e-numerātiōnis,f,III
+enumerātiō,enumerātiōnis,f,III
 ēnūntiātiō,ēnūntiātiōnis,f,III
 ēnūntiātum,ēnūntiātī,n,II
 ēnūptiō,ēnūptiōnis,f,III
@@ -2125,7 +2125,7 @@ fēlēs,fēlis,f,III
 fēlīcitās,fēlīcitātis,f,III
 fēmella,fēmellae,f,I
 fēmina,fēminae,f,I
-femur,femuroris or inis,n,III
+femur,femuroris,n,III
 fenestra,fenestrae,f,I
 fera,ferae,f,I
 ferentārius,ferentāriī,m,II
@@ -2661,7 +2661,7 @@ incōnsīderantia,incōnsīderantiae,f,I
 incōnstantia,incōnstantiae,f,I
 incontinentia,incontinentiae,f,I
 incrēmentum,incrēmentī,n,II
-in-cultus,in-cultūs,m,IV
+incultus,incultūs,m,IV
 incūria,incūriae,f,I
 incursiō,incursiōnis,f,III
 incursus,incursūs,m,IV
@@ -2704,10 +2704,10 @@ inertia,inertiae,f,I
 īnflātus,īnflātūs,m,IV
 īnflexiō,īnflexiōnis,f,III
 īnflexus,īnflexūs,m,IV
-īn-fōrmātiō,īn-fōrmātiōnis,f,III
+īnfōrmātiō,īnfōrmātiōnis,f,III
 īnfortūnium,īnfortūniī,n,II
 īnfrāctiō,īnfrāctiōnis,f,III
-īn-frequentia,īn-frequentiae,f,I
+īnfrequentia,īnfrequentiae,f,I
 īnfula,īnfulae,f,I
 ingenium,ingeniī,n,II
 ingenuitās,ingenuitātis,f,III
@@ -2728,11 +2728,11 @@ inlecebra,inlecebrae,f,I
 inlīberālitās,inlīberālitātis,f,III
 inlicitātor,inlicitātōris,m,III
 inlūsiō,inlūsiōnis,f,III
-in-nocentia,in-nocentiae,f,I
+innocentia,innocentiae,f,I
 innumerābilitās,innumerābilitātis,f,III
 inopia,inopiae,f,I
 inquīsītor,inquīsītōris,m,III
-in-reverentia,in-reverentiae,f,I
+inreverentia,inreverentiae,f,I
 inrigātiō,inrigātiōnis,f,III
 inrīsiō,inrīsiōnis,f,III
 inrīsor,inrīsōris,m,III
@@ -2745,7 +2745,7 @@ inrumātiō,inrumātiōnis,f,III
 inruptiō,inruptiōnis,f,III
 īnsānia,īnsāniae,f,I
 īnsānitās,īnsānitātis,f,III
-īn-scientia,īn-scientiae,f,I
+īnscientia,īnscientiae,f,I
 īnscītia,īnscītiae,f,I
 inscrīptiō,inscrīptiōnis,f,III
 īnsectātiō,īnsectātiōnis,f,III
@@ -2803,21 +2803,21 @@ interitus,interitūs,m,IV
 interlūnium,interlūniī,n,II
 intermissiō,intermissiōnis,f,III
 interneciō,interneciōnis,f,III
-inter-nōdium,inter-nōdiī,n,II
-inter-nūntia,inter-nūntiae,f,I
+internōdium,internōdiī,n,II
+internūntia,internūntiae,f,I
 interpellatiō,interpellatiōnis,f,III
 interpellātor,interpellātōris,m,III
 interpositiō,interpositiōnis,f,III
 interpres,interpreetis,m,III
 interpretātiō,interpretātiōnis,f,III
 interpunctiō,interpunctiōnis,f,III
-inter-rēgnum,inter-rēgnī,n,II
-inter-rēx,inter-rērēgis,m,III
+interrēgnum,interrēgnī,n,II
+interrēx,interrērēgis,m,III
 interrogātiō,interrogātiōnis,f,III
 interrogātiuncula,interrogātiunculae,f,I
 interspīrātiō,interspīrātiōnis,f,III
 intertrīmentum,intertrīmentī,n,II
-inter-vāllum,inter-vāllī,n,II
+intervāllum,intervāllī,n,II
 interventor,interventōris,m,III
 interventus,interventūs,m,IV
 intestīnum,intestīnī,n,II
@@ -3066,7 +3066,7 @@ līgnātor,līgnātōris,m,III
 līgnum,līgnī,n,II
 ligō,ligōnis,m,III
 ligula,ligulae,f,I
-ligurrītiō -,ligurrītiō -ōnis,f,III
+ligurrītiō,ligurrītiōōnis,f,III
 ligustrum,ligustrī,n,II
 līlium,līliī,n,II
 līma,līmae,f,I
@@ -3112,7 +3112,7 @@ loquācitās,loquācitātis,f,III
 loquēla,loquēlae,f,I
 lōrīca,lōrīcae,f,I
 lōrum,lōrī,n,II
-lōtus and lōtos,lōtus and lōtosī,f,II
+lōtusandlōtos,lōtusandlōtosī,f,II
 lūcānicā,lūcānicāae,f,I
 lūcar,lūcarāris,n,III
 lucellum,lucellī,n,II
@@ -3170,7 +3170,7 @@ māchina,māchinae,f,I
 māchināmentum,māchināmentī,n,II
 māchinātiō,māchinātiōnis,f,III
 māchinātor,māchinātōris,m,III
-macrocōlum and macrocollum,macrocōlum and macrocollī,n,II
+macrocōlumandmacrocollum,macrocōlumandmacrocollī,n,II
 macula,maculae,f,I
 Maecēnās,Maecēnātis,m,III
 maena,maenae,f,I
@@ -3245,7 +3245,7 @@ matella,matellae,f,I
 matelliō,matelliōnis,m,III
 māter,mātertris,f,III
 mātercula,māterculae,f,I
-māteria and māteriēs,māteria and māteriēsae,f,I
+māteriaandmāteriēs,māteriaandmāteriēsae,f,I
 mātertera,māterterae,f,I
 mathēmaticus,mathēmaticī,m,II
 mātrālia,mātrāliaium,n,II
@@ -3599,13 +3599,13 @@ nūtrīmentum,nūtrīmentī,n,II
 nūtrīx,nūtrīīcis,f,III
 nux,nunucis,f,III
 Nyctelius,Nycteliī,m,II
-ob-ductiō,ob-ductiōnis,f,III
+obductiō,obductiōnis,f,III
 obeliscus,obeliscī,m,II
 obiectātiō,obiectātiōnis,f,III
 obiūrgātiō,obiūrgātiōnis,f,III
 obiūrgātor,obiūrgātōris,m,III
 oblectāmentum,oblectāmentī,n,II
-ob-lectātiō,ob-lectātiōnis,f,III
+oblectātiō,oblectātiōnis,f,III
 obligātiō,obligātiōnis,f,III
 oblīviō,oblīviōnis,f,III
 oblīvium,oblīviī,n,II
@@ -3630,7 +3630,7 @@ obsīgnātor,obsīgnātōris,m,III
 obsōnium,obsōniī,n,II
 obstetrīx,obstetrīīcis,f,III
 obstinātiō,obstinātiōnis,f,III
-ob-strūctiō,ob-strūctiōnis,f,III
+obstrūctiō,obstrūctiōnis,f,III
 obtemperātiō,obtemperātiōnis,f,III
 obtestātiō,obtestātiōnis,f,III
 obtrectātiō,obtrectātiōnis,f,III
@@ -3725,7 +3725,7 @@ Orgetorīx,Orgetorīīgis,m,III
 oricilla,oricillae,f,I
 oriēns,oriēnentis,m,III
 orīgō,orīginis,f,III
-Ōrīōn,Ōrīōnōnis or onis,m,III
+Ōrīōn,Ōrīōnōnis,m,III
 ōrnāmentum,ōrnāmentī,n,II
 ōrnātrīx,ōrnātrīīcis,f,III
 ōrnātus,ōrnātūs,m,IV
@@ -3895,7 +3895,7 @@ pēnūria,pēnūriae,f,I
 peplum,peplī,n,II
 pēra,pērae,f,I
 perāctiō,perāctiōnis,f,III
-per-adulēscentulus,per-adulēscentulī,m,II
+peradulēscentulus,peradulēscentulī,m,II
 peragrātiō,peragrātiōnis,f,III
 perca,percae,f,I
 perceptiō,perceptiōnis,f,III
@@ -3931,7 +3931,7 @@ periūrium,periūriī,n,II
 permānsiō,permānsiōnis,f,III
 permissiō,permissiōnis,f,III
 permīxtiō,permīxtiōnis,f,III
-per-mōtiō,per-mōtiōnis,f,III
+permōtiō,permōtiōnis,f,III
 permūtātiō,permūtātiōnis,f,III
 perna,pernae,f,I
 pernīcitās,pernīcitātis,f,III
@@ -4017,7 +4017,7 @@ pietās,pietātis,f,III
 pīgmentārius,pīgmentāriī,m,II
 pīgmentum,pīgmentī,n,II
 pīgnerātor,pīgnerātōris,m,III
-pīgnus,pīgnuoris and eris,n,III
+pīgnus,pīgnuorisanderis,n,III
 pigritia,pigritiae,f,I
 pīla,pīlae,f,I
 pīla,pīlae,f,I
@@ -4187,21 +4187,21 @@ praefectūra,praefectūrae,f,I
 praefectus,praefectī,m,II
 praegressiō,praegressiōnis,f,III
 praegustātor,praegustātōris,m,III
-prae-iūdicium,prae-iūdiciī,n,II
+praeiūdicium,praeiūdiciī,n,II
 praemeditātiō,praemeditātiōnis,f,III
 praemium,praemiī,n,II
-prae-molestia,prae-molestiae,f,I
+praemolestia,praemolestiae,f,I
 praemonitus,praemonitūs,m,IV
 praemōnstrātor,praemōnstrātōris,m,III
 praemūnītiō,praemūnītiōnis,f,III
-prae-nōmen,prae-nōmeninis,n,III
+praenōmen,praenōmeninis,n,III
 praenōtiō,praenōtiōnis,f,III
-prae-nūntia,prae-nūntiae,f,I
+praenūntia,praenūntiae,f,I
 praeoccupātiō,praeoccupātiōnis,f,III
 praeparātiō,praeparātiōnis,f,III
 praepositiō,praepositiōnis,f,III
 praepositus,praepositī,m,II
-prae-pūtium,prae-pūtiī,n,II
+praepūtium,praepūtiī,n,II
 praes,praepraedis,m,III
 praesaepe,praesaepeis,n,III
 praesāgītiō,praesāgītiōnis,f,III
@@ -4248,7 +4248,7 @@ prīvīgna,prīvīgnae,f,I
 prīvīgnus,prīvīgnī,m,II
 prīvilēgium,prīvilēgiī,n,II
 proāgorus,proāgorī,m,II
-pro-avus,pro-avī,m,II
+proavus,proavī,m,II
 probābilitās,probābilitātis,f,III
 probātiō,probātiōnis,f,III
 probātor,probātōris,m,III
@@ -4261,7 +4261,7 @@ prōcessiō,prōcessiōnis,f,III
 prōcessus,prōcessūs,m,IV
 prōclāmātor,prōclāmātōris,m,III
 prōclīvitās,prōclīvitātis,f,III
-prō-cōnsul,prō-cōnsulis,m,III
+prōcōnsul,prōcōnsulis,m,III
 prōcōnsulātus,prōcōnsulātūs,m,IV
 prōcrāstinatiō,prōcrāstinatiōnis,f,III
 prōcreātiō,prōcreātiōnis,f,III
@@ -4270,7 +4270,7 @@ prōcreātrīx,prōcreātrīīcis,f,III
 prōcūrātiō,prōcūrātiōnis,f,III
 prōcūrātrīx,prōcūrātrīīcis,f,III
 prōcursātiō,prōcursātiōnis,f,III
-prō-cursātorēs,prō-cursātorōris,m,III
+prōcursātorēs,prōcursātorōris,m,III
 procus,procī,m,II
 prōdigentia,prōdigentiae,f,I
 prōdigium,prōdigiī,n,II
@@ -4297,7 +4297,7 @@ prōlēs,prōlis,f,III
 prōlogus,prōlogī,m,II
 prōlubium,prōlubiī,n,II
 prōlūsiō,prōlūsiōnis,f,III
-prō-meritum,prō-meritī,n,II
+prōmeritum,prōmeritī,n,II
 prōmissiō,prōmissiōnis,f,III
 prōmissor,prōmissōris,m,III
 prōmissum,prōmissī,n,II
@@ -4305,13 +4305,13 @@ prōmulgātio,prōmulgātioōnis,f,III
 prōmulsis,prōmulsidis,f,III
 prōmunturium,prōmunturiī,n,II
 prōmus,prōmī,m,II
-pro-nepōs,pro-nepōōtis,m,III
+pronepōs,pronepōōtis,m,III
 pronoea,pronoeae,f,I
 prōnuba,prōnubae,f,I
 prōnūntiātiō,prōnūntiātiōnis,f,III
 prōnūntiātor,prōnūntiātōris,m,III
 prōnūntiātum,prōnūntiātī,n,II
-prō-nurus,prō-nurūs,f,IV
+prōnurus,prōnurūs,f,IV
 prooemium,prooemiī,n,II
 prōpāgātiō,prōpāgātiōnis,f,III
 prōpāgātor,prōpāgātōris,m,III
@@ -4321,10 +4321,10 @@ properantia,properantiae,f,I
 properātiō,properātiōnis,f,III
 propinquitās,propinquitātis,f,III
 propōla,propōlae,m,I
-prō-portiō,prō-portiōnis,f,III
+prōportiō,prōportiōnis,f,III
 prōpositiō,prōpositiōnis,f,III
 prōpositum,prōpositī,n,II
-prō-praetor,prō-praetōris,m,III
+prōpraetor,prōpraetōris,m,III
 proprietās,proprietātis,f,III
 propudium,propudiī,n,II
 prōpūgnāculum,prōpūgnāculī,n,II
@@ -4461,7 +4461,7 @@ questus,questūs,m,IV
 quiēs,quiētis,f,III
 quīncunx,quīncununcis,m,III
 quīnquennium,quīnquenniī,n,II
-quīnque-vir,quīnque-virī,m,II
+quīnquevir,quīnquevirī,m,II
 Quirīnus,Quirīnī,m,II
 Quiris,Quirītis,m,III
 quirītātiō,quirītātiōnis,f,III
@@ -4509,7 +4509,7 @@ recessus,recessūs,m,IV
 recitātiō,recitātiōnis,f,III
 recitātor,recitātōris,m,III
 reclāmātiō,reclāmātiōnis,f,III
-re-cōgnitiō,re-cōgnitiōnis,f,III
+recōgnitiō,recōgnitiōnis,f,III
 reconciliātiō,reconciliātiōnis,f,III
 reconciliātor,reconciliātōris,m,III
 recordātiō,recordātiōnis,f,III
@@ -4576,7 +4576,7 @@ reprehēnsor,reprehēnsōris,m,III
 repressor,repressōris,m,III
 reprōmissiō,reprōmissiōnis,f,III
 repudiātiō,repudiātiōnis,f,III
-re-pudium,re-pudiī,n,II
+repudium,repudiī,n,II
 repūgnantia,repūgnantiae,f,I
 repulsa,repulsae,f,I
 reputātiō,reputātiōnis,f,III
@@ -4751,7 +4751,7 @@ sartāgō,sartāginis,f,III
 satelles,satelleitis,m,III
 satietās,satietātis,f,III
 satiō,satiōnis,f,III
-satis-datiō,satis-datiōnis,f,III
+satisdatiō,satisdatiōnis,f,III
 satisfactiō,satisfactiōnis,f,III
 sator,satōris,m,III
 satrapīa,satrapīae,f,I
@@ -4848,17 +4848,17 @@ sellārius,sellāriī,m,II
 sellula,sellulae,f,I
 sēmen,sēmeninis,n,III
 sēmentis,sēmentis,f,III
-sēmi-bōs,sēmi-bōbovis,m,III
-sēmi-homo,sēmi-homoinis,m,III
-sēmi-hōra,sēmi-hōrae,f,I
-sēmi-lixa,sēmi-lixae,m,I
-sēmi-mās,sēmi-mmaris,m,III
+sēmibōs,sēmibōbovis,m,III
+sēmihomo,sēmihomoinis,m,III
+sēmihōra,sēmihōrae,f,I
+sēmilixa,sēmilixae,m,I
+sēmimās,sēmimmaris,m,III
 sēminārium,sēmināriī,n,II
 sēminātor,sēminātōris,m,III
 Semīramis,Semīramidis,f,III
 sēmis,sēmissis,m,III
 sēmita,sēmitae,f,I
-sē-modius,sē-modiī,m,II
+sēmodius,sēmodiī,m,II
 sēmūncia,sēmūnciae,f,I
 senāculum,senāculī,n,II
 sēnāriolus,sēnāriolī,m,II
@@ -4900,8 +4900,8 @@ servola,servolae,f,I
 servolus,servolī,m,II
 servus,servī,m,II
 seselis,seselis,f,III
-sēsqui-modius,sēsqui-modiī,m,II
-sēsqui-plāga,sēsqui-plāgae,f,I
+sēsquimodius,sēsquimodiī,m,II
+sēsquiplāga,sēsquiplāgae,f,I
 sessiō,sessiōnis,f,III
 sessiuncula,sessiunculae,f,I
 sessor,sessōris,m,III
@@ -5135,7 +5135,7 @@ suāviloquentia,suāviloquentiae,f,I
 suāvitās,suāvitātis,f,III
 suāvium,suāviī,n,II
 subāctiō,subāctiōnis,f,III
-sub-centuriō,sub-centuriōnis,m,III
+subcenturiō,subcenturiōnis,m,III
 subductiō,subductiōnis,f,III
 sūber,sūbereris,n,III
 subiectiō,subiectiōnis,f,III
@@ -5160,7 +5160,7 @@ subūcula,subūculae,f,I
 subulcus,subulcī,m,II
 Subūra,Subūrae,f,I
 suburbānitās,suburbānitātis,f,III
-sub-urbium,sub-urbiī,n,II
+suburbium,suburbiī,n,II
 subvectiō,subvectiōnis,f,III
 subvectus,subvectūs,m,IV
 subversor,subversōris,m,III
@@ -5450,7 +5450,7 @@ trīstitia,trīstitiae,f,I
 trīticum,trīticī,n,II
 Trītōn,Trītōnōnis,m,III
 Trītōnia,Trītōniae,f,I
-Trītōnis,Trītōnisidis or idos,f,II
+Trītōnis,Trītōnisidis,f,II
 trītūra,trītūrae,f,I
 triumphus,triumphī,m,II
 trivium,triviī,n,II
@@ -5663,7 +5663,7 @@ vēsānia,vēsāniae,f,I
 vēsīca,vēsīcae,f,I
 vēsīcula,vēsīculae,f,I
 vespa,vespae,f,I
-vesper,vespererī or eris,m,III
+vesper,vespererī,m,III
 vespera,vesperae,f,I
 Vesta,Vestae,f,I
 vestibulum,vestibulī,n,II
@@ -5683,7 +5683,7 @@ via,viae,f,I
 viāticum,viāticī,n,II
 viātor,viātōris,m,III
 vīburnum,vīburnī,n,II
-Vica Pota,Vica Potae,f,I
+VicaPota,VicaPotae,f,I
 vīcēnsima,vīcēnsimae,f,I
 vicia,viciae,f,I
 vīcīnia,vīcīniae,f,I

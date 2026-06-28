@@ -88,13 +88,38 @@ fn classify(orth_raw: &str, pos: &str, itype: &str, gender: &str, tr: &str) -> R
 // ── helpers ──────────────────────────────────────────────────────────────
 
 fn clean_orth(s: &str) -> String {
-    clean_field(s)
+    clean_field_keep_hyphens(s)
 }
 
-/// Strip parenthetical glosses, newlines, and commas from CSV-bound fields.
+fn clean_field_keep_hyphens(s: &str) -> String {
+    let s = s.trim().replace(['\n', '\r', ','], "");
+    let mut out = String::new();
+    let mut depth = 0u32;
+    for c in s.chars() {
+        match (c, depth) {
+            ('(' | '（', _) => depth += 1,
+            (')' | '）', 1..) => {
+                depth -= 1;
+                continue;
+            }
+            (_, 1..) => {}
+            (_, 0) => {
+                out.push(c);
+            }
+        }
+    }
+    let s = out.trim().to_string();
+    let s = if let Some(p) = s.find(" or ") {
+        s[..p].trim().to_string()
+    } else {
+        s
+    };
+    s.split_whitespace().collect::<Vec<_>>().join("")
+}
+
+/// Strip parenthetical glosses, newlines, commas, and hyphens from CSV-bound fields.
 fn clean_field(s: &str) -> String {
     let s = s.trim().replace(['\n', '\r', ','], "");
-    let s = s.as_str();
 
     // Strip parenthetical content like "(adsp-, -argō）".
     let mut out = String::new();
@@ -113,13 +138,19 @@ fn clean_field(s: &str) -> String {
         }
     }
     let s = out.trim().to_string();
-    let s = s.as_str();
 
     // "amōmum or -on" → "amōmum"
-    if let Some(p) = s.find(" or ") {
-        return s[..p].trim().to_string();
-    }
-    s.to_string()
+    let s = if let Some(p) = s.find(" or ") {
+        s[..p].trim().to_string()
+    } else {
+        s
+    };
+
+    // Collapse whitespace and remove hyphens.
+    s.replace('-', "")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join("")
 }
 
 fn prep_cases(pos: &str, tr: &str) -> String {
@@ -213,8 +244,14 @@ fn try_verb(orth: &str, itype: &str) -> Option<VerbRow> {
     for p in &parts {
         let p = p
             .trim()
-            .trim_matches(|c: char| c == '.' || c == '—' || c.is_whitespace());
+            .trim_matches(|c: char| c == '.' || c == '—' || c == '-' || c.is_whitespace());
+        // Take first of " or " alternatives.
+        let p = match p.find(" or ") {
+            Some(pos) => &p[..pos],
+            None => p,
+        };
         let p = p.strip_suffix(" sum").unwrap_or(p);
+        let p = p.trim_start_matches('-');
         if p.is_empty() || p == "—" {
             continue;
         }
@@ -286,7 +323,7 @@ fn build_full_infinitive(present: &str, inf_raw: &str) -> String {
     if pref.is_empty() {
         format!("{stem}{ir}")
     } else {
-        format!("{pref}-{stem}{ir}")
+        format!("{pref}{stem}{ir}")
     }
 }
 
@@ -306,26 +343,33 @@ fn build_full_form(present: &str, raw: &str) -> String {
         if stem.is_empty() {
             return r;
         }
+        let attached = attach_suffix(stem, &r);
         if pref.is_empty() {
-            format!("{stem}{r}")
+            attached
         } else {
-            format!("{pref}-{stem}{r}")
+            format!("{pref}{attached}")
         }
     } else if pref.is_empty() {
-        r
+        try_prefix_simplex(present, &r).unwrap_or(r)
     } else {
         format!("{pref}{r}")
     }
 }
 
 /// Known Latin perfect/supine suffix forms that attach to the present stem.
-/// These are purely morphological suffixes, not ablaut forms.
 fn is_known_suffix(raw: &str) -> bool {
     matches!(
         raw,
         "āvī"
-            | "uī"
+            | "ēvī"
             | "īvī"
+            | "uī"
+            | "iī"
+            | "sī"
+            | "dī"
+            | "tī"
+            | "bī"
+            | "xī"
             | "ātus"
             | "ātum"
             | "itus"
@@ -334,7 +378,76 @@ fn is_known_suffix(raw: &str) -> bool {
             | "ūtum"
             | "ētus"
             | "ētum"
+            | "sus"
+            | "sum"
+            | "tus"
+            | "tum"
     )
+}
+
+/// Attach a suffix to a stem, handling consonant overlap and assimilation.
+/// e.g. stem "claud" + suffix "sī" → "clausī" (d+s → s)
+///      stem "rād"  + suffix "sī" → "rāsī"
+///      stem "vīs"  + suffix "sī" → "vīsī" (same char, overlap)
+fn attach_suffix(stem: &str, suffix: &str) -> String {
+    let mut stem_chars: Vec<char> = stem.chars().collect();
+    let mut suffix_chars: Vec<char> = suffix.chars().collect();
+    match (stem_chars.last(), suffix_chars.first()) {
+        (Some(&'d' | &'t'), Some(&'s' | &'t')) => {
+            stem_chars.pop();
+        }
+        (Some(a), Some(b)) if a == b => {
+            suffix_chars.remove(0);
+        }
+        _ => {}
+    }
+    let s: String = stem_chars.iter().collect();
+    let uf: String = suffix_chars.iter().collect();
+    format!("{s}{uf}")
+}
+
+/// For non-hyphenated compound verbs, the itype gives the simplex perfect/
+/// supine form. Detect overlap between present stem and raw form to recover
+/// the prefix. E.g. "accolō" + "coluī" → overlap "col" → "accoluī".
+fn try_prefix_simplex(present: &str, raw: &str) -> Option<String> {
+    let pnf = nfc(present);
+    let stem = strip_personal(&pnf);
+    if stem.len() < 3 || raw.len() < 3 {
+        return None;
+    }
+    let stem_chars: Vec<char> = stem.chars().collect();
+    let raw_chars: Vec<char> = raw.chars().collect();
+    for i in (2..=stem_chars.len().min(raw_chars.len())).rev() {
+        let stem_tail: Vec<char> = stem_chars[stem_chars.len() - i..]
+            .iter()
+            .map(|c| demacron(*c))
+            .collect();
+        let raw_head: Vec<char> = raw_chars[..i].iter().map(|c| demacron(*c)).collect();
+        if stem_tail == raw_head {
+            let prefix: String = stem_chars[..stem_chars.len() - i].iter().collect();
+            if !prefix.is_empty() {
+                return Some(format!("{prefix}{raw}"));
+            }
+            return None;
+        }
+    }
+    None
+}
+
+fn demacron(c: char) -> char {
+    match c {
+        'ā' => 'a',
+        'Ā' => 'A',
+        'ē' => 'e',
+        'Ē' => 'E',
+        'ī' => 'i',
+        'Ī' => 'I',
+        'ō' => 'o',
+        'Ō' => 'O',
+        'ū' => 'u',
+        'Ū' => 'U',
+        _ => c,
+    }
 }
 
 fn strip_personal(s: &str) -> &str {
@@ -531,26 +644,26 @@ impl Writers {
             Row::Noun(n) => writeln!(
                 self.nouns,
                 "{},{},{},{}",
-                csv_quote(&n.nominative),
-                csv_quote(&n.genitive),
+                csv_quote(&strip_hyphens(&n.nominative)),
+                csv_quote(&strip_hyphens(&n.genitive)),
                 n.gender,
                 n.declension
             )?,
             Row::Verb(v) => writeln!(
                 self.verbs,
                 "{},{},{},{},{}",
-                csv_quote(&v.present),
-                csv_quote(&v.infinitive),
-                csv_quote(&v.perfect),
-                csv_quote(&v.supine),
+                csv_quote(&strip_hyphens(&v.present)),
+                csv_quote(&strip_hyphens(&v.infinitive)),
+                csv_quote(&strip_hyphens(&v.perfect)),
+                csv_quote(&strip_hyphens(&v.supine)),
                 v.conjugation
             )?,
             Row::Adjective(a) => writeln!(
                 self.adjs,
                 "{},{},{},{}",
-                csv_quote(&a.f),
-                csv_quote(&a.m),
-                csv_quote(&a.n),
+                csv_quote(&strip_hyphens(&a.f)),
+                csv_quote(&strip_hyphens(&a.m)),
+                csv_quote(&strip_hyphens(&a.n)),
                 a.declension
             )?,
             Row::Preposition(p) => {
@@ -575,6 +688,23 @@ fn csv_quote(s: &str) -> String {
     } else {
         s.to_string()
     }
+}
+
+fn strip_hyphens(s: &str) -> String {
+    // Strip " or X" alternatives first, then remove hyphens and collapse spaces.
+    let s = match s.find(" or ") {
+        Some(p) => s[..p].to_string(),
+        None => s.to_string(),
+    };
+    s.replace(
+        [
+            '-', '\u{2010}', '\u{2011}', '\u{2012}', '\u{2013}', '\u{2014}',
+        ],
+        "",
+    )
+    .split_whitespace()
+    .collect::<Vec<_>>()
+    .join("")
 }
 
 // ── XML field extraction from one <entry> fragment ───────────────────────
@@ -759,7 +889,7 @@ fn process_one(buf: &str, w: &mut Writers, stats: &mut Stats) {
     let f = extract_fields(frag);
     // Strip newlines/commas from raw XML values, but keep commas in itype
     // (needed for verb principal‑part parsing).
-    let o = clean_field(&f.orth);
+    let o = clean_field_keep_hyphens(&f.orth);
     let p = clean_field(&f.pos);
     let i = f.itype.trim().replace('\n', "").replace('\r', "");
     let g = clean_field(&f.gender);
