@@ -3,65 +3,12 @@ use super::*;
 impl VerbInstance<'_> {
     pub(super) fn conjugate_iii(&self) -> String {
         let stem_vowel = self.get_stem_vowel_iii();
-        let stem = self.get_stem_iii();
+        let stem = self.get_stem();
         let infix: String = self.get_infix_iii();
         let ending: &str = self.get_ending();
 
-        // println!("{stem}  {stem_vowel}  {infix}  {ending}");
+        println!("{stem}  {stem_vowel}  {infix}  {ending}");
         format!("{stem}{stem_vowel}{infix}{ending}")
-    }
-
-    fn get_stem_iii(&self) -> String {
-        // Handle i_stem formation
-        let i_stem = self.verb.present.chars().rev().nth(1) == Some('i');
-        let stem_chars_rm = if !i_stem
-            || (self.verb.is_deponent()
-                || self.tense == Tense::Imperfect
-                || (self.person == Person::First && self.number == Number::Singular)
-                || (self.person == Person::Third && self.number == Number::Plural))
-        {
-            1
-        } else {
-            2
-        };
-
-        match self.mood {
-            Mood::Indicative | Mood::Imperative => match self.tense {
-                Tense::Present | Tense::Imperfect | Tense::Future => self
-                    .verb
-                    .present
-                    .chars()
-                    .take(self.verb.present.chars().count() - stem_chars_rm)
-                    .collect(),
-                Tense::Perfect | Tense::Pluperfect | Tense::FuturePerfect => self
-                    .verb
-                    .perfect
-                    .chars()
-                    .take(self.verb.perfect.chars().count() - 1)
-                    .collect(),
-            },
-            Mood::Subjunctive => match self.tense {
-                Tense::Present => self
-                    .verb
-                    .present
-                    .chars()
-                    .take(self.verb.present.chars().count() - 1)
-                    .collect(),
-                Tense::Imperfect => self
-                    .verb
-                    .infinitive
-                    .chars()
-                    .take(self.verb.infinitive.chars().count() - 1)
-                    .collect(),
-                Tense::Perfect | Tense::Pluperfect | Tense::FuturePerfect => self
-                    .verb
-                    .perfect
-                    .chars()
-                    .take(self.verb.perfect.chars().count() - 1)
-                    .collect(),
-                Tense::Future => panic!("There is no future subjunctive"),
-            },
-        }
     }
 
     fn get_stem_vowel_iii(&self) -> String {

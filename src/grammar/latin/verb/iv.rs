@@ -2,60 +2,14 @@ use super::*;
 
 impl VerbInstance<'_> {
     pub(super) fn conjugate_iv(&self) -> String {
-        let stem = self.get_stem_iv();
+        let stem = self.get_stem();
         let stem_vowel = self.get_stem_vowel_iv();
         let infix: String = self.get_infix_iv();
-        let ending: &str = self.get_ending_iv();
+        let ending: &str = self.get_ending();
 
         // println!("{stem}  {stem_vowel}  {infix}  {ending}  ");
 
         format!("{stem}{stem_vowel}{infix}{ending}")
-    }
-
-    fn get_stem_iv(&self) -> String {
-        match self.mood {
-            Mood::Indicative | Mood::Imperative => match self.tense {
-                Tense::Present | Tense::Future => self
-                    .verb
-                    .present
-                    .chars()
-                    .take(self.verb.present.chars().count() - 2)
-                    .collect(),
-                Tense::Imperfect => self
-                    .verb
-                    .present
-                    .chars()
-                    .take(self.verb.present.chars().count() - 1)
-                    .collect(),
-                Tense::Perfect | Tense::Pluperfect | Tense::FuturePerfect => self
-                    .verb
-                    .perfect
-                    .chars()
-                    .take(self.verb.perfect.chars().count() - 1)
-                    .collect(),
-            },
-            Mood::Subjunctive => match self.tense {
-                Tense::Present => self
-                    .verb
-                    .present
-                    .chars()
-                    .take(self.verb.present.chars().count() - 1)
-                    .collect(),
-                Tense::Imperfect => self
-                    .verb
-                    .infinitive
-                    .chars()
-                    .take(self.verb.infinitive.chars().count() - 1)
-                    .collect(),
-                Tense::Perfect | Tense::Pluperfect | Tense::FuturePerfect => self
-                    .verb
-                    .perfect
-                    .chars()
-                    .take(self.verb.perfect.chars().count() - 1)
-                    .collect(),
-                Tense::Future => panic!("There is no future subjunctive"),
-            },
-        }
     }
 
     fn get_stem_vowel_iv(&self) -> String {
@@ -64,7 +18,7 @@ impl VerbInstance<'_> {
                 Number::Singular => match self.mood {
                     Mood::Indicative => match self.tense {
                         Tense::Present | Tense::Perfect => match self.voice {
-                            Voice::Active => "i".to_string(),
+                            Voice::Active => "".to_string(),
                             Voice::Passive => "o".to_string(),
                         },
                         Tense::Imperfect => "ē".to_string(),
@@ -113,7 +67,7 @@ impl VerbInstance<'_> {
                     Tense::Present => match self.voice {
                         Voice::Active => match self.number {
                             Number::Singular => "i".to_string(),
-                            Number::Plural => "iu".to_string(),
+                            Number::Plural => "u".to_string(),
                         },
                         Voice::Passive => match self.number {
                             Number::Singular => "i".to_string(),
@@ -151,60 +105,6 @@ impl VerbInstance<'_> {
                 _ => "".to_string(),
             },
             _ => "".to_string(),
-        }
-    }
-
-    fn get_ending_iv(&self) -> &'static str {
-        match self.person {
-            Person::First => match self.number {
-                Number::Singular => match self.mood {
-                    Mood::Indicative => match self.voice {
-                        Voice::Active => match self.tense {
-                            Tense::Present => "ō",
-                            Tense::Imperfect | Tense::Future => "m",
-                            Tense::Perfect => "ī",
-                            _ => "",
-                        },
-                        Voice::Passive => "r",
-                    },
-                    Mood::Subjunctive => "m",
-                    Mood::Imperative => panic!("No 1st person imperative"),
-                },
-                Number::Plural => match self.voice {
-                    Voice::Active => "mus",
-                    Voice::Passive => "mur",
-                },
-            },
-            Person::Second => match self.number {
-                Number::Singular => match (self.voice, self.mood) {
-                    (Voice::Active, Mood::Indicative) => match self.tense {
-                        Tense::Perfect => "stī",
-                        _ => "s",
-                    },
-                    (Voice::Passive, _) => "ris",
-                    _ => "s",
-                },
-                Number::Plural => match self.voice {
-                    Voice::Active => match (self.mood, self.tense) {
-                        (Mood::Indicative, Tense::Perfect) => "stis",
-                        _ => "tis",
-                    },
-                    Voice::Passive => "minī",
-                },
-            },
-            Person::Third => match self.number {
-                Number::Singular => match self.voice {
-                    Voice::Active => "t",
-                    Voice::Passive => "tur",
-                },
-                Number::Plural => match self.voice {
-                    Voice::Active => match (self.mood, self.tense) {
-                        (Mood::Subjunctive, Tense::Perfect) => "nt",
-                        _ => "nt",
-                    },
-                    Voice::Passive => "ntur",
-                },
-            },
         }
     }
 }

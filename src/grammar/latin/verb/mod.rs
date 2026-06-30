@@ -160,7 +160,19 @@ impl VerbInstance<'_> {
                     match self.verb.conjugation {
                         Conjugation::I => 1,
                         Conjugation::II => 2,
-                        _ => 2,
+                        Conjugation::III | Conjugation::IV => {
+                            let i_stem = self.verb.present.chars().rev().nth(1) == Some('i');
+                            match (self.tense, i_stem) {
+                                (Tense::Imperfect, _) => 1,
+                                (_, false) => 1,
+                                (_, true) => match (self.person, self.number) {
+                                    (Person::First, Number::Singular)
+                                    | (Person::Third, Number::Plural) => 1,
+                                    _ => 2,
+                                },
+                            }
+                        }
+                        _ => 1,
                     },
                 ),
                 true => (self.verb.present.clone(), 2),
@@ -185,6 +197,9 @@ impl VerbInstance<'_> {
             .as_ref()
             .filter(|s| !s.is_empty())
             .unwrap_or(&self.verb.perfect);
+        if verb.is_empty() {
+            return "".to_string();
+        }
         let stem: String = verb.chars().take(verb.chars().count() - 2).collect();
 
         let adjective = Adjective {
@@ -208,7 +223,8 @@ impl VerbInstance<'_> {
         match self.verb.conjugation {
             Conjugation::I => ("ā", "ē"),
             Conjugation::II => ("ē", "ā"),
-            // Conjugation::III => ("i", "ā"),
+            Conjugation::III => ("i", "ā"),
+            Conjugation::IV => ("i", "ā"),
             _ => todo!("Integrate III, IV, Irr"),
         }
     }

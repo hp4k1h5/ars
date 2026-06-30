@@ -4,6 +4,7 @@
 /// elements, then classifies PoS with simple XML‑field heuristics. Output
 /// files match the existing data/latin/ format.
 use std::{
+    collections::HashMap,
     fs::File,
     io::{BufRead, BufReader, BufWriter, Write},
     path::Path,
@@ -13,6 +14,7 @@ use quick_xml::{Reader, events::Event};
 
 // ── output rows (match data/latin/*.csv column headers) ──────────────────
 
+#[derive(Clone)]
 struct NounRow {
     nominative: String,
     genitive: String,
@@ -20,6 +22,7 @@ struct NounRow {
     declension: String,
 }
 
+#[derive(Clone)]
 struct VerbRow {
     present: String,
     infinitive: String,
@@ -28,6 +31,7 @@ struct VerbRow {
     conjugation: String,
 }
 
+#[derive(Clone)]
 struct AdjectiveRow {
     f: String,
     m: String,
@@ -35,11 +39,13 @@ struct AdjectiveRow {
     declension: String,
 }
 
+#[derive(Clone)]
 struct PrepositionRow {
     word: String,
     cases: String,
 }
 
+#[derive(Clone)]
 enum Row {
     Noun(NounRow),
     Verb(VerbRow),
@@ -329,8 +335,6 @@ fn build_full_infinitive(present: &str, inf_raw: &str) -> String {
 
 /// Reconstruct a full perfect or supine form.
 /// Returns empty string if raw is empty.
-/// For known suffix patterns (āvī, uī, īvī, ātus, itus, etc.) appends to stem.
-/// For simplex forms, combines with explicit prefix from hyphenated presents.
 fn build_full_form(present: &str, raw: &str) -> String {
     if raw.is_empty() {
         return String::new();
@@ -338,19 +342,35 @@ fn build_full_form(present: &str, raw: &str) -> String {
     let p = nfc(present);
     let r = nfc(raw);
     let (pref, base) = p.rsplit_once('-').unwrap_or(("", &p));
-    if is_known_suffix(&r) {
-        let stem = strip_personal(base);
-        if stem.is_empty() {
-            return r;
+    let stem = strip_personal(base);
+
+    // If the raw form starts with the stem's last character and the
+    // remainder would be a known suffix, strip the overlapping consonant.
+    // E.g. "suscēns" + "suī" → suffix "uī" → "suscēnsuī".
+    let mut suffix = r.clone();
+    if !is_known_suffix(&r) && !stem.is_empty() {
+        let sc: Vec<char> = stem.chars().collect();
+        let rc: Vec<char> = r.chars().collect();
+        if rc.len() > 1 && sc.last() == rc.first() {
+            let candidate: String = rc[1..].iter().collect();
+            if is_known_suffix(&candidate) {
+                suffix = candidate;
+            }
         }
-        let attached = attach_suffix(stem, &r);
+    }
+
+    if is_known_suffix(&suffix) {
+        if stem.is_empty() {
+            return suffix;
+        }
+        let attached = attach_suffix(stem, &suffix);
         if pref.is_empty() {
             attached
         } else {
             format!("{pref}{attached}")
         }
     } else if pref.is_empty() {
-        try_prefix_simplex(present, &r).unwrap_or(r)
+        try_prefix_simplex(present, &r).unwrap_or(r.clone())
     } else {
         format!("{pref}{r}")
     }
@@ -831,8 +851,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let file = File::open(xml_path)?;
     let reader = BufReader::new(file);
-    let mut w = Writers::new(out_dir)?;
-    let mut stats = Stats::default();
+    let mut rows: Vec<Row> = Vec::new();
     let mut buf = String::new();
     let mut ln = 0usize;
     let mut collecting = false;
@@ -847,7 +866,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     buf.clear();
                     buf.push_str(&l);
                     if l.contains("</entry>") {
-                        process_one(&buf, &mut w, &mut stats);
+                        collect_row(&buf, &mut rows);
                         collecting = false;
                     }
                 }
@@ -856,9 +875,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             buf.push('\n');
             buf.push_str(&l);
             if l.contains("</entry>") {
-                process_one(&buf, &mut w, &mut stats);
+                collect_row(&buf, &mut rows);
                 collecting = false;
             }
+        }
+    }
+
+    fill_compound_verbs(&mut rows);
+
+    let mut w = Writers::new(out_dir)?;
+    let mut stats = Stats::default();
+    for row in &rows {
+        stats.tally(row);
+        if let Err(e) = w.put(row) {
+            eprintln!("write error: {e}");
         }
     }
     w.flush_all()?;
@@ -879,7 +909,7 @@ fn in_range(line: usize, start: usize, end: usize) -> bool {
     true
 }
 
-fn process_one(buf: &str, w: &mut Writers, stats: &mut Stats) {
+fn collect_row(buf: &str, rows: &mut Vec<Row>) {
     let frag = if let Some(s) = buf.find("<entry") {
         if let Some(e) = buf.rfind("</entry>") {
             &buf[s..e + 8]
@@ -890,16 +920,137 @@ fn process_one(buf: &str, w: &mut Writers, stats: &mut Stats) {
         return;
     };
     let f = extract_fields(frag);
-    // Strip newlines/commas from raw XML values, but keep commas in itype
-    // (needed for verb principal‑part parsing).
     let o = clean_field_keep_hyphens(&f.orth);
     let p = clean_field(&f.pos);
     let i = f.itype.trim().replace('\n', "").replace('\r', "");
     let g = clean_field(&f.gender);
     let t = clean_field(&f.tr);
-    let row = classify(&o, &p, &i, &g, &t);
-    stats.tally(&row);
-    if let Err(e) = w.put(&row) {
-        eprintln!("write error: {e}");
+    rows.push(classify(&o, &p, &i, &g, &t));
+}
+
+// ── compound verb back‑filling ──────────────────────────────────────────
+
+const PREFIXES: &[&str] = &[
+    "circum", "praeter", "super", "subter", "inter", "intro", "ab", "abs", "ad", "ante", "com",
+    "con", "co", "contra", "de", "dis", "di", "ex", "e", "extra", "in", "im", "ob", "per", "post",
+    "prae", "pro", "re", "red", "se", "sub", "sus", "trans", "tra",
+];
+
+fn fill_compound_verbs(rows: &mut Vec<Row>) {
+    let mut base_perf: HashMap<String, String> = HashMap::new();
+    let mut base_sup: HashMap<String, String> = HashMap::new();
+
+    for row in rows.iter() {
+        if let Row::Verb(v) = row {
+            let clean = strip_hyphens(&v.present);
+            let stem = strip_personal(&nfc(&clean)).to_string();
+            if !v.perfect.is_empty() {
+                base_perf.insert(stem.clone(), v.perfect.clone());
+            }
+            if !v.supine.is_empty() {
+                base_sup.insert(stem.clone(), v.supine.clone());
+            }
+        }
     }
+
+    for row in rows.iter_mut() {
+        let Row::Verb(v) = row else { continue };
+        if !v.perfect.is_empty() && !v.supine.is_empty() {
+            continue;
+        }
+
+        let clean = strip_hyphens(&v.present);
+        let cpd_stem = {
+            let n = nfc(&clean);
+            strip_personal(&n).to_string()
+        };
+
+        'outer: for &pref in PREFIXES {
+            let pref_nfc = nfc(pref);
+            if let Some(leftover) = cpd_stem.strip_prefix(&pref_nfc) {
+                if leftover.len() < 2 {
+                    continue;
+                }
+                if let Some(bp_stem) = resolve_base_stem(leftover, &base_perf, &base_sup) {
+                    if v.perfect.is_empty() {
+                        if let Some(bperf) = base_perf.get(&bp_stem) {
+                            let suffix = extract_suffix(&bp_stem, bperf);
+                            v.perfect = attach_suffix(&cpd_stem, &suffix);
+                        }
+                    }
+                    if v.supine.is_empty() {
+                        if let Some(bsup) = base_sup.get(&bp_stem) {
+                            let suffix = extract_suffix(&bp_stem, bsup);
+                            v.supine = attach_suffix(&cpd_stem, &suffix);
+                        }
+                    }
+                    break 'outer;
+                }
+            }
+        }
+    }
+}
+
+fn resolve_base_stem(
+    leftover: &str,
+    base_perf: &HashMap<String, String>,
+    base_sup: &HashMap<String, String>,
+) -> Option<String> {
+    let exists = |bp: &str| -> bool {
+        let s = strip_personal(bp);
+        base_perf.contains_key(s) || base_sup.contains_key(s)
+    };
+    if exists(leftover) {
+        return Some(strip_personal(leftover).to_string());
+    }
+    for suffix in ["ō", "or", "eō"] {
+        let bp = format!("{leftover}{suffix}");
+        if exists(&bp) {
+            return Some(strip_personal(&bp).to_string());
+        }
+    }
+    let ch: Vec<char> = leftover.chars().collect();
+    let vp: Vec<usize> = ch
+        .iter()
+        .enumerate()
+        .filter(|(_, c)| matches!(c, 'a' | 'e' | 'i' | 'o' | 'u' | 'ā' | 'ē' | 'ī' | 'ō' | 'ū'))
+        .map(|(i, _)| i)
+        .collect();
+    for &p in &vp {
+        for &r in &['a', 'i', 'e', 'u', 'ā', 'ī', 'ē', 'ū'] {
+            if r == ch[p] {
+                continue;
+            }
+            let mut vc = ch.clone();
+            vc[p] = r;
+            let vs: String = vc.iter().collect();
+            if exists(&vs) {
+                return Some(vs);
+            }
+            for sfx in ["ō", "or", "eō"] {
+                let vsp = format!("{vs}{sfx}");
+                if exists(&vsp) {
+                    return Some(strip_personal(&vsp).to_string());
+                }
+            }
+        }
+    }
+    None
+}
+
+fn extract_suffix(base_stem: &str, full: &str) -> String {
+    if full.is_empty() {
+        return String::new();
+    }
+    if let Some(s) = full.strip_prefix(base_stem) {
+        return s.to_string();
+    }
+    let ac: Vec<char> = base_stem.chars().collect();
+    let bc: Vec<char> = full.chars().collect();
+    for i in (1..=ac.len().min(bc.len())).rev() {
+        if ac[ac.len() - i..] == bc[..i] {
+            return full[i..].to_string();
+        }
+    }
+    full.to_string()
 }
