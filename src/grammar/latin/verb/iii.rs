@@ -1,30 +1,38 @@
 use super::*;
 
 impl VerbInstance<'_> {
-    pub(super) fn conjugate_iii(&self) -> String {
-        let stem_vowel = self.get_stem_vowel_iii();
+    pub(super) fn conjugate_iii(&mut self) -> String {
         let stem = self.get_stem();
+        let stem_vowel = self.get_stem_vowel_iii();
         let infix: String = self.get_infix_iii();
-        let ending: &str = self.get_ending();
+        let ending = match (self.tense, self.voice, self.mood) {
+            (Tense::Perfect, Voice::Passive, _) => self.handle_deponent(),
+            (Tense::Perfect, Voice::Active, _) => self.perfect_helper(),
+            (Tense::Pluperfect | Tense::FuturePerfect, _, _) => self.perfect_helper(),
+            _ => self.get_ending().to_string(),
+        };
 
-        println!("{stem}  {stem_vowel}  {infix}  {ending}");
         format!("{stem}{stem_vowel}{infix}{ending}")
     }
 
     fn get_stem_vowel_iii(&self) -> String {
+        if [Tense::Perfect, Tense::Pluperfect, Tense::FuturePerfect].contains(&self.tense) {
+            if self.verb.is_deponent() || self.voice == Voice::Passive {
+                return " ".to_string();
+            } else {
+                return "".to_string();
+            }
+        }
         match self.person {
             Person::First => match self.number {
                 Number::Singular => match self.mood {
                     Mood::Indicative => match self.tense {
-                        Tense::Present
-                        | Tense::Perfect
-                        | Tense::Pluperfect
-                        | Tense::FuturePerfect => "".to_string(),
+                        Tense::Present => "".to_string(),
                         Tense::Imperfect => "ē".to_string(),
                         Tense::Future => "a".to_string(),
+                        _ => "".to_string(),
                     },
                     Mood::Subjunctive => match self.tense {
-                        Tense::Perfect => "eri".to_string(),
                         Tense::Imperfect => "e".to_string(),
                         _ => "a".to_string(),
                     },
@@ -34,11 +42,9 @@ impl VerbInstance<'_> {
                     Mood::Indicative => match self.tense {
                         Tense::Present => "i".to_string(),
                         Tense::Imperfect | Tense::Future => "ē".to_string(),
-                        Tense::Perfect => "i".to_string(),
                         _ => "".to_string(),
                     },
                     Mood::Subjunctive => match self.tense {
-                        Tense::Perfect => "eri".to_string(),
                         Tense::Imperfect => "ē".to_string(),
                         _ => "ā".to_string(),
                     },
@@ -47,17 +53,16 @@ impl VerbInstance<'_> {
             },
             Person::Second => match self.mood {
                 Mood::Indicative | Mood::Imperative => match self.tense {
-                    Tense::Present => match (self.voice, self.person, self.number) {
-                        (Voice::Passive, Person::Second, Number::Singular) => "e".to_string(),
+                    Tense::Present => match (self.voice, self.mood, self.number) {
+                        (_, Mood::Imperative, Number::Singular) => "".to_string(),
+                        (Voice::Passive, _, Number::Singular) => "e".to_string(),
                         _ => "i".to_string(),
                     },
-                    Tense::Perfect => "i".to_string(),
                     Tense::Imperfect => "ē".to_string(),
                     Tense::Future => "ē".to_string(),
                     _ => "".to_string(),
                 },
                 Mood::Subjunctive => match self.tense {
-                    Tense::Perfect => "eri".to_string(),
                     Tense::Imperfect => "ē".to_string(),
                     _ => "ā".to_string(),
                 },
@@ -70,18 +75,13 @@ impl VerbInstance<'_> {
                     },
                     Tense::Imperfect => "ē".to_string(),
                     Tense::Future => "e".to_string(),
-                    Tense::Perfect => match self.number {
-                        Number::Singular => "i".to_string(),
-                        Number::Plural => "ēru".to_string(),
-                    },
                     _ => "".to_string(),
                 },
                 Mood::Subjunctive => match self.tense {
-                    Tense::Perfect => match self.number {
-                        Number::Singular => "eri".to_string(),
-                        Number::Plural => "eri".to_string(),
+                    Tense::Imperfect => match (self.voice, self.number) {
+                        (Voice::Passive, Number::Singular) => "ē".to_string(),
+                        _ => "e".to_string(),
                     },
-                    Tense::Imperfect => "e".to_string(),
                     _ => "a".to_string(),
                 },
                 Mood::Imperative => panic!("No 3rd person imperative"),
@@ -93,7 +93,12 @@ impl VerbInstance<'_> {
         match self.mood {
             Mood::Indicative => match self.tense {
                 Tense::Imperfect => match (self.person, self.number) {
-                    (Person::Third, _) | (Person::First, Number::Singular) => "ba".to_string(),
+                    (Person::First, Number::Singular) => "ba".to_string(),
+                    (Person::Third, _) => match (self.number, self.voice) {
+                        (_, Voice::Active) => "ba".to_string(),
+                        (Number::Singular, Voice::Passive) => "bā".to_string(),
+                        _ => "ba".to_string(),
+                    },
                     _ => "bā".to_string(),
                 },
                 _ => "".to_string(),
@@ -360,39 +365,39 @@ mod tests {
         assert_eq!(expected, result)
     }
 
-    // #[rstest]
-    // #[case(Person::First, Number::Singular, "amāvī")]
-    // #[case(Person::Second, Number::Singular, "amāvistī")]
-    // #[case(Person::Third, Number::Singular, "amāvit")]
-    // #[case(Person::First, Number::Plural, "amāvimus")]
-    // #[case(Person::Second, Number::Plural, "amāvistis")]
-    // #[case(Person::Third, Number::Plural, "amāvērunt")]
-    // fn test_conj_perf_ind_act(
-    //     #[case] person: Person,
-    //     #[case] number: Number,
-    //     #[case] expected: String,
-    // ) {
-    //     let verb = Verb {
-    //         id: None,
-    //         conjugation: Conjugation::III,
-    //         present: "amō".to_string(),
-    //         infinitive: "amāre".to_string(),
-    //         perfect: "amāvī".to_string(),
-    //         supine: Some("amātum".to_string()),
-    //     };
-    //
-    //     let mut vi = VerbInstance {
-    //         verb: &verb,
-    //         person,
-    //         number,
-    //         tense: Tense::Perfect,
-    //         mood: Mood::Indicative,
-    //         voice: Voice::Active,
-    //     };
-    //     let result = vi.conjugate();
-    //
-    //     assert_eq!(expected, result)
-    // }
+    #[rstest]
+    #[case(Person::First, Number::Singular, "dūxī")]
+    #[case(Person::Second, Number::Singular, "dūxistī")]
+    #[case(Person::Third, Number::Singular, "dūxit")]
+    #[case(Person::First, Number::Plural, "dūximus")]
+    #[case(Person::Second, Number::Plural, "dūxistis")]
+    #[case(Person::Third, Number::Plural, "dūxērunt")]
+    fn test_conj_perf_ind_act_iii(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::III,
+            present: "dūcō".to_string(),
+            infinitive: "dūcere".to_string(),
+            perfect: "dūxī".to_string(),
+            supine: Some("ductum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Perfect,
+            mood: Mood::Indicative,
+            voice: Voice::Active,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
 
     #[rstest]
     #[case(Person::First, Number::Singular, "agam")]
@@ -462,37 +467,473 @@ mod tests {
         assert_eq!(expected, result)
     }
 
-    // #[rstest]
-    // #[case(Person::First, Number::Singular, "amāverim")]
-    // #[case(Person::Second, Number::Singular, "amāveris")]
-    // #[case(Person::Third, Number::Singular, "amāverit")]
-    // #[case(Person::First, Number::Plural, "amāverimus")]
-    // #[case(Person::Second, Number::Plural, "amāveritis")]
-    // #[case(Person::Third, Number::Plural, "amāverint")]
-    // fn test_conj_perf_subj_act(
-    //     #[case] person: Person,
-    //     #[case] number: Number,
-    //     #[case] expected: String,
-    // ) {
-    //     let verb = Verb {
-    //         id: None,
-    //         conjugation: Conjugation::III,
-    //         present: "amō".to_string(),
-    //         infinitive: "amāre".to_string(),
-    //         perfect: "amāvī".to_string(),
-    //         supine: Some("amātum".to_string()),
-    //     };
-    //
-    //     let mut vi = VerbInstance {
-    //         verb: &verb,
-    //         person,
-    //         number,
-    //         tense: Tense::Perfect,
-    //         mood: Mood::Subjunctive,
-    //         voice: Voice::Active,
-    //     };
-    //     let result = vi.conjugate();
-    //
-    //     assert_eq!(expected, result)
-    // }
+    #[rstest]
+    #[case(Person::First, Number::Singular, "dūxerim")]
+    #[case(Person::Second, Number::Singular, "dūxeris")]
+    #[case(Person::Third, Number::Singular, "dūxerit")]
+    #[case(Person::First, Number::Plural, "dūxerimus")]
+    #[case(Person::Second, Number::Plural, "dūxeritis")]
+    #[case(Person::Third, Number::Plural, "dūxerint")]
+    fn test_conj_perf_subj_act_iii(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::III,
+            present: "dūcō".to_string(),
+            infinitive: "dūcere".to_string(),
+            perfect: "dūxī".to_string(),
+            supine: Some("ductum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Perfect,
+            mood: Mood::Subjunctive,
+            voice: Voice::Active,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "sequor")]
+    #[case(Person::Second, Number::Singular, "sequeris")]
+    #[case(Person::Third, Number::Singular, "sequitur")]
+    #[case(Person::First, Number::Plural, "sequimur")]
+    #[case(Person::Second, Number::Plural, "sequiminī")]
+    #[case(Person::Third, Number::Plural, "sequuntur")]
+    fn test_conj_pres_ind_act_dep_iii(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::III,
+            present: "sequor".to_string(),
+            infinitive: "sequī".to_string(),
+            perfect: "secūtum".to_string(),
+            supine: None,
+        };
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Present,
+            mood: Mood::Indicative,
+            voice: Voice::Active,
+        };
+        let result = vi.conjugate();
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "dūcēbar")]
+    #[case(Person::Second, Number::Singular, "dūcēbāris")]
+    #[case(Person::Third, Number::Singular, "dūcēbātur")]
+    #[case(Person::First, Number::Plural, "dūcēbāmur")]
+    #[case(Person::Second, Number::Plural, "dūcēbāminī")]
+    #[case(Person::Third, Number::Plural, "dūcēbantur")]
+    fn test_conj_impf_ind_pass_iii(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::III,
+            present: "dūcō".to_string(),
+            infinitive: "dūcere".to_string(),
+            perfect: "dūxī".to_string(),
+            supine: Some("ductum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Imperfect,
+            mood: Mood::Indicative,
+            voice: Voice::Passive,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "agerer")]
+    #[case(Person::Second, Number::Singular, "agerēris")]
+    #[case(Person::Third, Number::Singular, "agerētur")]
+    #[case(Person::First, Number::Plural, "agerēmur")]
+    #[case(Person::Second, Number::Plural, "agerēminī")]
+    #[case(Person::Third, Number::Plural, "agerentur")]
+    fn test_conj_impf_subj_pass_iii(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::III,
+            present: "agō".to_string(),
+            infinitive: "agere".to_string(),
+            perfect: "ēgī".to_string(),
+            supine: Some("actum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Imperfect,
+            mood: Mood::Subjunctive,
+            voice: Voice::Passive,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "ductum sum")]
+    #[case(Person::Second, Number::Singular, "ductum es")]
+    #[case(Person::Third, Number::Singular, "ductum est")]
+    #[case(Person::First, Number::Plural, "ducta sumus")]
+    #[case(Person::Second, Number::Plural, "ducta estis")]
+    #[case(Person::Third, Number::Plural, "ducta sunt")]
+    fn test_conj_perf_ind_pass_iii(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::III,
+            present: "dūcō".to_string(),
+            infinitive: "dūcere".to_string(),
+            perfect: "dūxī".to_string(),
+            supine: Some("ductum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Perfect,
+            mood: Mood::Indicative,
+            voice: Voice::Passive,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "secūtum sum")]
+    #[case(Person::Second, Number::Singular, "secūtum es")]
+    #[case(Person::Third, Number::Singular, "secūtum est")]
+    #[case(Person::First, Number::Plural, "secūta sumus")]
+    #[case(Person::Second, Number::Plural, "secūta estis")]
+    #[case(Person::Third, Number::Plural, "secūta sunt")]
+    fn test_conj_perf_ind_pass_iii_dep(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::III,
+            present: "sequor".to_string(),
+            infinitive: "sequī".to_string(),
+            perfect: "secūtum".to_string(),
+            supine: None,
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Perfect,
+            mood: Mood::Indicative,
+            voice: Voice::Passive,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "dūxeram")]
+    #[case(Person::Second, Number::Singular, "dūxerās")]
+    #[case(Person::Third, Number::Singular, "dūxerat")]
+    #[case(Person::First, Number::Plural, "dūxerāmus")]
+    #[case(Person::Second, Number::Plural, "dūxerātis")]
+    #[case(Person::Third, Number::Plural, "dūxerant")]
+    fn test_conj_pluperf_ind_act_iii(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::III,
+            present: "dūcō".to_string(),
+            infinitive: "dūcere".to_string(),
+            perfect: "dūxī".to_string(),
+            supine: Some("ductum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Pluperfect,
+            mood: Mood::Indicative,
+            voice: Voice::Active,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "ductum eram")]
+    #[case(Person::Second, Number::Singular, "ductum erās")]
+    #[case(Person::Third, Number::Singular, "ductum erat")]
+    #[case(Person::First, Number::Plural, "ducta erāmus")]
+    #[case(Person::Second, Number::Plural, "ducta erātis")]
+    #[case(Person::Third, Number::Plural, "ducta erant")]
+    fn test_conj_pluperf_ind_pass_iii(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::III,
+            present: "dūcō".to_string(),
+            infinitive: "dūcere".to_string(),
+            perfect: "dūxī".to_string(),
+            supine: Some("ductum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Pluperfect,
+            mood: Mood::Indicative,
+            voice: Voice::Passive,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "dūxerō")]
+    #[case(Person::Second, Number::Singular, "dūxeris")]
+    #[case(Person::Third, Number::Singular, "dūxerit")]
+    #[case(Person::First, Number::Plural, "dūxerimus")]
+    #[case(Person::Second, Number::Plural, "dūxeritis")]
+    #[case(Person::Third, Number::Plural, "dūxerint")]
+    fn test_conj_futperf_ind_act_iii(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::III,
+            present: "dūcō".to_string(),
+            infinitive: "dūcere".to_string(),
+            perfect: "dūxī".to_string(),
+            supine: Some("ductum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::FuturePerfect,
+            mood: Mood::Indicative,
+            voice: Voice::Active,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "ductum erō")]
+    #[case(Person::Second, Number::Singular, "ductum eris")]
+    #[case(Person::Third, Number::Singular, "ductum erit")]
+    #[case(Person::First, Number::Plural, "ducta erimus")]
+    #[case(Person::Second, Number::Plural, "ducta eritis")]
+    #[case(Person::Third, Number::Plural, "ducta erunt")]
+    fn test_conj_futperf_ind_pass_iii(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::III,
+            present: "dūcō".to_string(),
+            infinitive: "dūcere".to_string(),
+            perfect: "dūxī".to_string(),
+            supine: Some("ductum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::FuturePerfect,
+            mood: Mood::Indicative,
+            voice: Voice::Passive,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "dūxissem")]
+    #[case(Person::Second, Number::Singular, "dūxissēs")]
+    #[case(Person::Third, Number::Singular, "dūxisset")]
+    #[case(Person::First, Number::Plural, "dūxissēmus")]
+    #[case(Person::Second, Number::Plural, "dūxissētis")]
+    #[case(Person::Third, Number::Plural, "dūxissent")]
+    fn test_conj_pluperf_subj_act_iii(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::III,
+            present: "dūcō".to_string(),
+            infinitive: "dūcere".to_string(),
+            perfect: "dūxī".to_string(),
+            supine: Some("ductum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Pluperfect,
+            mood: Mood::Subjunctive,
+            voice: Voice::Active,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "ductum essem")]
+    #[case(Person::Second, Number::Singular, "ductum essēs")]
+    #[case(Person::Third, Number::Singular, "ductum esset")]
+    #[case(Person::First, Number::Plural, "ducta essēmus")]
+    #[case(Person::Second, Number::Plural, "ducta essētis")]
+    #[case(Person::Third, Number::Plural, "ducta essent")]
+    fn test_conj_pluperf_subj_pass_iii(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::III,
+            present: "dūcō".to_string(),
+            infinitive: "dūcere".to_string(),
+            perfect: "dūxī".to_string(),
+            supine: Some("ductum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Pluperfect,
+            mood: Mood::Subjunctive,
+            voice: Voice::Passive,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::Second, Number::Singular, "dūc")]
+    #[case(Person::Second, Number::Plural, "dūcite")]
+    fn test_conj_pres_imp_act_iii(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::III,
+            present: "dūcō".to_string(),
+            infinitive: "dūcere".to_string(),
+            perfect: "dūxī".to_string(),
+            supine: Some("ductum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Present,
+            mood: Mood::Imperative,
+            voice: Voice::Active,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
+
+    #[rstest]
+    #[case(Person::First, Number::Singular, "ductum sim")]
+    #[case(Person::Second, Number::Singular, "ductum sīs")]
+    #[case(Person::Third, Number::Singular, "ductum sit")]
+    #[case(Person::First, Number::Plural, "ducta sīmus")]
+    #[case(Person::Second, Number::Plural, "ducta sītis")]
+    #[case(Person::Third, Number::Plural, "ducta sint")]
+    fn test_conj_perf_subj_pass_iii(
+        #[case] person: Person,
+        #[case] number: Number,
+        #[case] expected: String,
+    ) {
+        let verb = Verb {
+            id: None,
+            conjugation: Conjugation::III,
+            present: "dūcō".to_string(),
+            infinitive: "dūcere".to_string(),
+            perfect: "dūxī".to_string(),
+            supine: Some("ductum".to_string()),
+        };
+
+        let mut vi = VerbInstance {
+            verb: &verb,
+            person,
+            number,
+            tense: Tense::Perfect,
+            mood: Mood::Subjunctive,
+            voice: Voice::Passive,
+        };
+        let result = vi.conjugate();
+
+        assert_eq!(expected, result)
+    }
 }

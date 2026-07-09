@@ -198,7 +198,7 @@ impl VerbInstance<'_> {
             .filter(|s| !s.is_empty())
             .unwrap_or(&self.verb.perfect);
         if verb.is_empty() {
-            return "".to_string();
+            return verb.to_string();
         }
         let stem: String = verb.chars().take(verb.chars().count() - 2).collect();
 
