@@ -175,7 +175,18 @@ impl VerbInstance<'_> {
                         _ => 1,
                     },
                 ),
-                true => (self.verb.present.clone(), 2),
+                true => (self.verb.present.clone(), {
+                    if matches!(self.verb.conjugation, Conjugation::IV) {
+                        match (self.person, self.number) {
+                            (Person::First, Number::Singular) | (Person::Third, Number::Plural) => {
+                                2
+                            }
+                            _ => 3,
+                        }
+                    } else {
+                        2
+                    }
+                }),
             },
             (Tense::Perfect | Tense::Pluperfect | Tense::FuturePerfect, _) => match self.voice {
                 Voice::Active => (self.verb.perfect.clone(), 1),
