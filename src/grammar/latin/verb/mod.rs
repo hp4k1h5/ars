@@ -152,7 +152,7 @@ impl VerbInstance<'_> {
     }
     fn get_stem(&self) -> String {
         let deponent = self.verb.is_deponent();
-        let (prinicpal_part, ch) = match (self.tense, self.mood) {
+        let (principal_part, ch) = match (self.tense, self.mood) {
             (Tense::Imperfect, Mood::Subjunctive) => (self.verb.infinitive.clone(), 1),
             (Tense::Present | Tense::Imperfect | Tense::Future, _) => match deponent {
                 false => (
@@ -194,10 +194,10 @@ impl VerbInstance<'_> {
             },
         };
 
-        prinicpal_part
+        principal_part
             .clone()
             .chars()
-            .take(prinicpal_part.chars().count() - ch)
+            .take(principal_part.chars().count() - ch)
             .collect()
     }
 
