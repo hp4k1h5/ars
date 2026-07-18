@@ -11,15 +11,12 @@ use ars::api::{
 use axum::{Router, middleware, response::Json, routing::get};
 use serde_json::{Value, json};
 use tracing::info;
-use tracing_subscriber::prelude::*;
 
 const DEFAULT_PORT: u16 = 7357;
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::registry()
-        .with(tracing_stackdriver::layer())
-        .init();
+    tracing_subscriber::fmt().json().with_target(false).init();
 
     let args: Vec<String> = std::env::args().collect();
     let port = if args.len() > 1 {

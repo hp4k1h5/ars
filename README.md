@@ -27,13 +27,13 @@ Eventually, there will be a database of lexical items for other languages, but t
 
 An experimental api is served from a minimal instance in the cloud. There is a separate terraform repository for deployment.
 
-Try visiting [http://api.ars.wiki/latin/verbs/8ac13640-5e53-428f-a4e6-6cb18a64a85b/conjugate](http://api.ars.wiki/latin/verbs/8ac13640-5e53-428f-a4e6-6cb18a64a85b/conjugate).
+Try visiting [http://api.ars.wiki/latin/verbs/8ac13640-5e53-428f-a4e6-6cb18a64a85b/conjugate](http://api.ars.wiki/latin/verbs/8ac13640-5e53-428f-a4e6-6cb18a64a85b/conjugate) or [http://api.ars.wiki/latin/query/ambulo](http://api.ars.wiki/latin/query/ambulo).
 
 ## Ars server
 
 ### environment variables
 The following environment variables should be set to interact with the
-database. A `.env.{ARS_ENV}` may be used.
+database. A `.env.{ARS_ENV}` file may be used.
 
 ```bash
 ARS_ENV=dev
@@ -55,3 +55,8 @@ docker run \
   --env-file .env.dev \
   ars:latest
 ```
+
+
+## AI policy
+
+I'm working with a variety of models and tools as I learn more about rust's ecosystem. I don't include an AGENTS.md here because I'm not convinced this is the best interface for generic AI instruction, or whether sharing mine is worthwhile. Most of the base models and interfaces in /grammar were written without AI, but I've refactored a few times to accommodate new ideas. AI has been helpful in implementing the diesel + axum API mostly as a macro on top of existing models with minimal changes.
