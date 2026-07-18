@@ -1,11 +1,11 @@
 use ars::api::latin::create_latin_adjective;
-use ars::{establish_cnx, grammar::latin::adjective::NewAdjective};
+use ars::{establish_cnx, grammar::latin::adjective::Adjective};
 use std::error::Error;
 
 #[derive(Debug)]
 struct AdjectiveError {
     line_number: usize,
-    adj_data: Option<NewAdjective>,
+    adj_data: Option<Adjective>,
     error: String,
 }
 
@@ -21,32 +21,24 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut cnx = establish_cnx();
     let mut successful_writes: Vec<String> = Vec::new();
     let mut errors: Vec<AdjectiveError> = Vec::new();
-    for (line_number, result) in rdr.deserialize::<NewAdjective>().enumerate() {
+    for (line_number, result) in rdr.deserialize::<Adjective>().enumerate() {
         match result {
-            Ok(new_adj) => {
-                match create_latin_adjective(
-                    &mut cnx,
-                    &new_adj.declension,
-                    &new_adj.f,
-                    &new_adj.m,
-                    &new_adj.n,
-                ) {
-                    Ok(adj) => {
-                        successful_writes.push(format!(
-                            "{} ({:?})",
-                            adj.n,
-                            Ok::<Option<uuid::Uuid>, ()>(adj.id)
-                        ));
-                    }
-                    Err(e) => {
-                        errors.push(AdjectiveError {
-                            line_number,
-                            adj_data: Some(new_adj),
-                            error: format!("Database error: {}", e),
-                        });
-                    }
+            Ok(adj) => match create_latin_adjective(&mut cnx, &adj) {
+                Ok(adj) => {
+                    successful_writes.push(format!(
+                        "{} ({:?})",
+                        adj.n,
+                        Ok::<Option<uuid::Uuid>, ()>(adj.id)
+                    ));
                 }
-            }
+                Err(e) => {
+                    errors.push(AdjectiveError {
+                        line_number,
+                        adj_data: Some(adj),
+                        error: format!("Database error: {}", e),
+                    });
+                }
+            },
             Err(e) => {
                 errors.push(AdjectiveError {
                     line_number,

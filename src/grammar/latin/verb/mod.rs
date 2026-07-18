@@ -14,7 +14,9 @@ pub mod ii;
 pub mod iii;
 pub mod iv;
 
-#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, Copy, PartialEq, DbEnum)]
+#[derive(
+    Debug, serde::Serialize, serde::Deserialize, Clone, Copy, PartialEq, DbEnum, utoipa::ToSchema,
+)]
 #[ExistingTypePath = "crate::schema::sql_types::Conjugation"]
 pub enum Conjugation {
     #[db_rename = "I"]
@@ -31,14 +33,18 @@ pub enum Conjugation {
     Esse = 6,
 }
 
-#[derive(Debug, Display, EnumString, Clone, Copy, PartialEq, serde::Serialize)]
+#[derive(
+    Debug, Display, EnumString, Clone, Copy, PartialEq, serde::Serialize, utoipa::ToSchema,
+)]
 pub enum Person {
     First,
     Second,
     Third,
 }
 
-#[derive(Debug, Display, EnumString, Clone, Copy, PartialEq, serde::Serialize)]
+#[derive(
+    Debug, Display, EnumString, Clone, Copy, PartialEq, serde::Serialize, utoipa::ToSchema,
+)]
 pub enum Tense {
     Present,
     Imperfect,
@@ -48,26 +54,39 @@ pub enum Tense {
     FuturePerfect,
 }
 
-#[derive(Debug, Display, EnumString, Clone, Copy, PartialEq, serde::Serialize)]
+#[derive(
+    Debug, Display, EnumString, Clone, Copy, PartialEq, serde::Serialize, utoipa::ToSchema,
+)]
 pub enum Mood {
     Indicative,
     Subjunctive,
     Imperative,
 }
 
-#[derive(Debug, Display, EnumString, Clone, Copy, PartialEq, serde::Serialize)]
+#[derive(
+    Debug, Display, EnumString, Clone, Copy, PartialEq, serde::Serialize, utoipa::ToSchema,
+)]
 pub enum Voice {
     Active,
     Passive,
 }
 
 /// Verb as lexical element
-#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, Queryable, Selectable)]
+#[derive(
+    Debug,
+    serde::Serialize,
+    serde::Deserialize,
+    Clone,
+    Queryable,
+    Selectable,
+    Insertable,
+    utoipa::ToSchema,
+)]
 #[diesel(table_name = latin_verbs)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-#[diesel(treat_none_as_default_value = false)]
 pub struct Verb {
     #[diesel(deserialize_as = Uuid)]
+    #[serde(default)]
     pub id: Option<Uuid>,
     pub conjugation: Conjugation,
     pub present: String,
@@ -91,26 +110,6 @@ impl Verb {
             supine: Some("futūrum".to_string()),
         }
     }
-}
-
-#[derive(Insertable, Debug)]
-#[diesel(table_name= latin_verbs)]
-pub struct NewVerb<'a> {
-    pub conjugation: Conjugation,
-    pub present: &'a str,
-    pub infinitive: &'a str,
-    pub perfect: &'a str,
-    pub supine: &'a str,
-}
-
-/// Owned version for CSV deserialization
-#[derive(Debug, serde::Deserialize)]
-pub struct NewVerbOwned {
-    pub conjugation: Conjugation,
-    pub present: String,
-    pub infinitive: String,
-    pub perfect: String,
-    pub supine: String,
 }
 
 /// Verb as used in a phrase

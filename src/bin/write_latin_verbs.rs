@@ -1,11 +1,11 @@
 use ars::api::latin::create_latin_verb;
-use ars::{establish_cnx, grammar::latin::verb::NewVerbOwned};
+use ars::{establish_cnx, grammar::latin::verb::Verb};
 use std::error::Error;
 
 #[derive(Debug)]
 struct VerbError {
     line_number: usize,
-    verb_data: Option<NewVerbOwned>,
+    verb_data: Option<Verb>,
     error: String,
 }
 
@@ -23,33 +23,24 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut successful_writes: Vec<String> = Vec::new();
     let mut errors: Vec<VerbError> = Vec::new();
 
-    for (line_number, result) in rdr.deserialize::<NewVerbOwned>().enumerate() {
+    for (line_number, result) in rdr.deserialize::<Verb>().enumerate() {
         match result {
-            Ok(new_verb) => {
-                match create_latin_verb(
-                    &mut cnx,
-                    &new_verb.conjugation,
-                    &new_verb.present,
-                    &new_verb.infinitive,
-                    &new_verb.perfect,
-                    &new_verb.supine,
-                ) {
-                    Ok(verb) => {
-                        successful_writes.push(format!(
-                            "{} ({:?})",
-                            verb.present,
-                            Ok::<Option<uuid::Uuid>, ()>(verb.id)
-                        ));
-                    }
-                    Err(e) => {
-                        errors.push(VerbError {
-                            line_number,
-                            verb_data: Some(new_verb),
-                            error: format!("Database error: {}", e),
-                        });
-                    }
+            Ok(verb) => match create_latin_verb(&mut cnx, &verb) {
+                Ok(verb) => {
+                    successful_writes.push(format!(
+                        "{} ({:?})",
+                        verb.present,
+                        Ok::<Option<uuid::Uuid>, ()>(verb.id)
+                    ));
                 }
-            }
+                Err(e) => {
+                    errors.push(VerbError {
+                        line_number,
+                        verb_data: Some(verb),
+                        error: format!("Database error: {}", e),
+                    });
+                }
+            },
             Err(e) => {
                 errors.push(VerbError {
                     line_number,
@@ -81,7 +72,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             println!("\n  Line {}: {}", err.line_number, err.error);
             if let Some(verb_data) = &err.verb_data {
                 println!(
-                    "    Data: present={}, infinitive={}, perfect={}, supine={}",
+                    "    Data: present={}, infinitive={}, perfect={}, supine={:?}",
                     verb_data.present, verb_data.infinitive, verb_data.perfect, verb_data.supine
                 );
             }

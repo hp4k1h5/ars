@@ -1,5 +1,5 @@
 use ars::api::{
-    app::AppState,
+    app::{AppState, health, root},
     latin::{
         lookup_word,
         nouns::{decline_noun, search_nouns},
@@ -7,10 +7,12 @@ use ars::api::{
         verbs::{conjugate_verb, search_verbs},
     },
     middleware::log_requests,
+    openapi::ApiDoc,
 };
-use axum::{Router, middleware, response::Json, routing::get};
-use serde_json::{Value, json};
+use axum::{Router, middleware, routing::get};
 use tracing::info;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 const DEFAULT_PORT: u16 = 7357;
 
@@ -42,6 +44,7 @@ async fn main() {
     );
 
     let app = Router::new()
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/", get(root))
         .route("/health", get(health))
         .route("/latin/query/{word}", get(lookup_word))
@@ -59,15 +62,4 @@ async fn main() {
     axum::serve(listener, app.into_make_service())
         .await
         .unwrap();
-}
-
-async fn root() -> &'static str {
-    "ars.wiki - Language API"
-}
-
-async fn health() -> Json<Value> {
-    Json(json!({
-        "status": "ok",
-        "service": "ars.wiki"
-    }))
 }

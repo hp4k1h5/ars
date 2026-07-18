@@ -11,7 +11,9 @@ pub mod iii;
 pub mod iv;
 pub mod v;
 
-#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, Copy, PartialEq, DbEnum)]
+#[derive(
+    Debug, serde::Serialize, serde::Deserialize, Clone, Copy, PartialEq, DbEnum, utoipa::ToSchema,
+)]
 #[ExistingTypePath = "crate::schema::sql_types::Declension"]
 pub enum Declension {
     #[db_rename = "I"]
@@ -27,7 +29,15 @@ pub enum Declension {
 }
 
 #[derive(
-    strum::EnumIter, Debug, PartialEq, Clone, Copy, DbEnum, serde::Serialize, serde::Deserialize,
+    strum::EnumIter,
+    Debug,
+    PartialEq,
+    Clone,
+    Copy,
+    DbEnum,
+    serde::Serialize,
+    serde::Deserialize,
+    utoipa::ToSchema,
 )]
 #[ExistingTypePath = "crate::schema::sql_types::GrammaticalCase"]
 pub enum Case {
@@ -45,7 +55,7 @@ pub enum Case {
     Vocative,
 }
 
-#[derive(Debug, PartialEq, Clone, Copy, serde::Serialize, DbEnum)]
+#[derive(Debug, PartialEq, Clone, Copy, serde::Serialize, DbEnum, utoipa::ToSchema)]
 #[ExistingTypePath = "crate::schema::sql_types::Gender"]
 pub enum Gender {
     #[db_rename = "Feminine"]
@@ -75,22 +85,23 @@ impl<'de> Deserialize<'de> for Gender {
 }
 
 /// Nominal declension, nominative and genitive forms
-#[derive(Debug, serde::Serialize, Clone, Queryable, Selectable, PartialEq)]
+#[derive(
+    Debug,
+    serde::Serialize,
+    serde::Deserialize,
+    Clone,
+    Queryable,
+    Selectable,
+    Insertable,
+    PartialEq,
+    utoipa::ToSchema,
+)]
 #[diesel(table_name = latin_nouns)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Noun {
     #[diesel(deserialize_as = Uuid)]
+    #[serde(default)]
     pub id: Option<Uuid>,
-    pub declension: Declension,
-    pub nominative: String,
-    pub genitive: String,
-    pub gender: Gender,
-}
-
-/// Owned version for CSV deserialization
-#[derive(Insertable, Debug, serde::Deserialize)]
-#[diesel(table_name= latin_nouns)]
-pub struct NewNoun {
     pub declension: Declension,
     pub nominative: String,
     pub genitive: String,

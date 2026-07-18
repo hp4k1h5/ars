@@ -31,7 +31,7 @@ pub mod verbs;
 
 pub use prepositions::create_latin_preposition;
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize, utoipa::ToSchema)]
 #[serde(tag = "pos")]
 pub enum WordResult {
     Verb {
@@ -198,6 +198,22 @@ pub fn lookup_word_cnx(
     Ok(results)
 }
 
+/// Look up all known forms of a word
+///
+/// Returns every dictionary entry matching the given form, along with the
+/// grammatical analysis (path encoding) for each match.
+#[utoipa::path(
+    get,
+    path = "/latin/query/{word}",
+    params(
+        ("word" = String, Path, description = "Inflected word form to look up")
+    ),
+    responses(
+        (status = 200, description = "Matching lexical entries with grammatical analysis", body = [WordResult]),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "latin"
+)]
 pub async fn lookup_word(
     State(_state): State<AppState>,
     Path(word): Path<String>,
@@ -210,65 +226,45 @@ pub async fn lookup_word(
 
 pub fn create_latin_noun(
     cnx: &mut PgConnection,
-    decl: &Declension,
-    nom: &str,
-    geni: &str,
-    gend: &Gender,
+    noun: &Noun,
 ) -> Result<Noun, diesel::result::Error> {
     let word_id = word::create_latin_word(cnx, LatinPos::Noun)?;
 
     diesel::insert_into(latin_nouns::table)
-        .values((
-            latin_nouns::id.eq(word_id),
-            latin_nouns::declension.eq(*decl),
-            latin_nouns::nominative.eq(nom),
-            latin_nouns::genitive.eq(geni),
-            latin_nouns::gender.eq(*gend),
-        ))
+        .values(Noun {
+            id: Some(word_id),
+            ..noun.clone()
+        })
         .returning(Noun::as_returning())
         .get_result(cnx)
 }
 
 pub fn create_latin_adjective(
     cnx: &mut PgConnection,
-    decl: &AdjDeclension,
-    f: &str,
-    m: &str,
-    n: &str,
+    adjective: &Adjective,
 ) -> Result<Adjective, diesel::result::Error> {
     let word_id = word::create_latin_word(cnx, LatinPos::Adjective)?;
 
     diesel::insert_into(latin_adjectives::table)
-        .values((
-            latin_adjectives::id.eq(word_id),
-            latin_adjectives::declension.eq(*decl),
-            latin_adjectives::f.eq(f),
-            latin_adjectives::m.eq(m),
-            latin_adjectives::n.eq(n),
-        ))
+        .values(Adjective {
+            id: Some(word_id),
+            ..adjective.clone()
+        })
         .returning(Adjective::as_returning())
         .get_result(cnx)
 }
 
 pub fn create_latin_verb(
     cnx: &mut PgConnection,
-    conj: &Conjugation,
-    pres: &str,
-    inf: &str,
-    perf: &str,
-    sup: &str,
+    verb: &Verb,
 ) -> Result<Verb, diesel::result::Error> {
     let word_id = word::create_latin_word(cnx, LatinPos::Verb)?;
 
     diesel::insert_into(latin_verbs::table)
-        .values((
-            latin_verbs::id.eq(word_id),
-            latin_verbs::conjugation.eq(*conj),
-            latin_verbs::present.eq(pres),
-            latin_verbs::infinitive.eq(inf),
-            latin_verbs::perfect.eq(perf),
-            latin_verbs::supine.eq(sup),
-        ))
+        .values(Verb {
+            id: Some(word_id),
+            ..verb.clone()
+        })
         .returning(Verb::as_returning())
         .get_result(cnx)
 }

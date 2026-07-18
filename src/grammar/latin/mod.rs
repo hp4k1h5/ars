@@ -6,7 +6,7 @@ pub mod preposition;
 pub mod verb;
 pub mod word;
 
-#[derive(Debug, PartialEq, Clone, Copy, serde::Serialize)]
+#[derive(Debug, PartialEq, Clone, Copy, serde::Serialize, utoipa::ToSchema)]
 pub enum Number {
     Singular,
     Plural,

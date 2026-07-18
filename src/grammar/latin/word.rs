@@ -24,18 +24,12 @@ pub enum LatinPos {
     Interjection,
 }
 
-#[derive(Debug, serde::Serialize, Clone, Queryable, Selectable)]
+#[derive(Debug, serde::Serialize, Clone, Queryable, Selectable, Insertable)]
 #[diesel(table_name = latin_words)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct LatinWord {
     #[diesel(deserialize_as = Uuid)]
-    pub id: Uuid,
-    pub pos: LatinPos,
-}
-
-#[derive(Insertable, Debug)]
-#[diesel(table_name = latin_words)]
-pub struct NewLatinWord {
+    pub id: Option<Uuid>,
     pub pos: LatinPos,
 }
 
@@ -45,7 +39,7 @@ pub fn create_latin_word(
 ) -> Result<Uuid, diesel::result::Error> {
     use diesel::RunQueryDsl;
     let id: Uuid = diesel::insert_into(latin_words::table)
-        .values(NewLatinWord { pos })
+        .values(LatinWord { id: None, pos })
         .returning(latin_words::id)
         .get_result(cnx)?;
     Ok(id)

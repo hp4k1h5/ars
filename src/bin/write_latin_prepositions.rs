@@ -1,6 +1,7 @@
 use ars::api::latin::prepositions::create_latin_preposition;
 use ars::establish_cnx;
 use ars::grammar::latin::noun::Case;
+use ars::grammar::latin::preposition::Preposition;
 use std::error::Error;
 
 #[derive(Debug)]
@@ -72,7 +73,12 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         };
 
-        match create_latin_preposition(&mut cnx, &word, &cases) {
+        let preposition = Preposition {
+            id: None,
+            word: word.clone(),
+            cases,
+        };
+        match create_latin_preposition(&mut cnx, &preposition) {
             Ok(prep) => {
                 successful_writes.push(format!(
                     "{} ({:?})",

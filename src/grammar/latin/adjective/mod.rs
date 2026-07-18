@@ -11,7 +11,9 @@ use diesel_derive_enum::DbEnum;
 use uuid::Uuid;
 
 #[allow(non_camel_case_types)]
-#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, Copy, PartialEq, DbEnum)]
+#[derive(
+    Debug, serde::Serialize, serde::Deserialize, Clone, Copy, PartialEq, DbEnum, utoipa::ToSchema,
+)]
 #[ExistingTypePath = "crate::schema::sql_types::AdjDeclension"]
 pub enum AdjDeclension {
     #[db_rename = "I_II"]
@@ -20,22 +22,23 @@ pub enum AdjDeclension {
     III,
 }
 
-#[derive(Debug, serde::Serialize, Clone, Queryable, Selectable, PartialEq)]
+#[derive(
+    Debug,
+    serde::Serialize,
+    serde::Deserialize,
+    Clone,
+    Queryable,
+    Selectable,
+    Insertable,
+    PartialEq,
+    utoipa::ToSchema,
+)]
 #[diesel(table_name = latin_adjectives)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Adjective {
     #[diesel(deserialize_as = Uuid)]
+    #[serde(default)]
     pub id: Option<Uuid>,
-    pub declension: AdjDeclension,
-    pub f: String,
-    pub m: String,
-    pub n: String,
-}
-
-/// Owned version for CSV deserialization
-#[derive(Insertable, Debug, serde::Deserialize)]
-#[diesel(table_name= latin_adjectives)]
-pub struct NewAdjective {
     pub declension: AdjDeclension,
     pub f: String,
     pub m: String,

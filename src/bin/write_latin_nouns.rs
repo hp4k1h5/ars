@@ -1,11 +1,11 @@
 use ars::api::latin::create_latin_noun;
-use ars::{establish_cnx, grammar::latin::noun::NewNoun};
+use ars::{establish_cnx, grammar::latin::noun::Noun};
 use std::error::Error;
 
 #[derive(Debug)]
 struct NounError {
     line_number: usize,
-    noun_data: Option<NewNoun>,
+    noun_data: Option<Noun>,
     error: String,
 }
 
@@ -23,32 +23,24 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut successful_writes: Vec<String> = Vec::new();
     let mut errors: Vec<NounError> = Vec::new();
 
-    for (line_number, result) in rdr.deserialize::<NewNoun>().enumerate() {
+    for (line_number, result) in rdr.deserialize::<Noun>().enumerate() {
         match result {
-            Ok(new_noun) => {
-                match create_latin_noun(
-                    &mut cnx,
-                    &new_noun.declension,
-                    &new_noun.nominative,
-                    &new_noun.genitive,
-                    &new_noun.gender,
-                ) {
-                    Ok(noun) => {
-                        successful_writes.push(format!(
-                            "{} ({:?})",
-                            noun.nominative,
-                            Ok::<Option<uuid::Uuid>, ()>(noun.id)
-                        ));
-                    }
-                    Err(e) => {
-                        errors.push(NounError {
-                            line_number,
-                            noun_data: Some(new_noun),
-                            error: format!("Database error: {}", e),
-                        });
-                    }
+            Ok(noun) => match create_latin_noun(&mut cnx, &noun) {
+                Ok(noun) => {
+                    successful_writes.push(format!(
+                        "{} ({:?})",
+                        noun.nominative,
+                        Ok::<Option<uuid::Uuid>, ()>(noun.id)
+                    ));
                 }
-            }
+                Err(e) => {
+                    errors.push(NounError {
+                        line_number,
+                        noun_data: Some(noun),
+                        error: format!("Database error: {}", e),
+                    });
+                }
+            },
             Err(e) => {
                 errors.push(NounError {
                     line_number,

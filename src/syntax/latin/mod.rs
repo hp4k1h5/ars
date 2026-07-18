@@ -10,17 +10,6 @@ use crate::{
 
 pub mod word_order;
 
-pub enum PoS {
-    VERB,
-    NOUN,
-    PRONOUN,
-    ADJECTIVE,
-    ADVERB,
-    CONJUNCTION,
-    PREPOSITION,
-    INTERJECTION,
-}
-
 pub enum GrammaticalRole {
     Subject,
     DirectObject,

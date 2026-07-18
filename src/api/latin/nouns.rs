@@ -17,19 +17,25 @@ use serde::Deserialize;
 use strum::IntoEnumIterator;
 use uuid::Uuid;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, utoipa::IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct NounQuery {
+    /// Filter by nominative form (accent-insensitive)
     nominative: Option<String>,
+    /// Maximum number of results (default 10)
     limit: Option<i64>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, utoipa::IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct DeclensionQuery {
+    /// Grammatical case: nominative, genitive, dative, accusative, ablative, vocative
     case: Option<String>,
+    /// Grammatical number: singular or plural
     number: Option<String>,
 }
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize, utoipa::ToSchema)]
 pub struct DeclensionResult {
     declension: Option<String>,
     case: String,
@@ -37,6 +43,19 @@ pub struct DeclensionResult {
     declined: String,
 }
 
+/// Search Latin nouns
+///
+/// Optionally filters by nominative form (accent-insensitive).
+#[utoipa::path(
+    get,
+    path = "/latin/nouns",
+    params(NounQuery),
+    responses(
+        (status = 200, description = "List of matching nouns", body = [Noun]),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "latin"
+)]
 pub async fn search_nouns(
     State(_state): State<AppState>,
     Query(params): Query<NounQuery>,
@@ -58,6 +77,24 @@ pub async fn search_nouns(
     Ok(Json(nouns))
 }
 
+/// Decline a noun
+///
+/// Returns the requested case/number combinations for the noun, defaulting
+/// to every case in both numbers.
+#[utoipa::path(
+    get,
+    path = "/latin/nouns/{noun}/decline",
+    params(
+        ("noun" = Uuid, Path, description = "Noun ID"),
+        DeclensionQuery
+    ),
+    responses(
+        (status = 200, description = "Declined forms", body = [DeclensionResult]),
+        (status = 400, description = "Invalid case or number parameter"),
+        (status = 500, description = "Noun not found or internal server error")
+    ),
+    tag = "latin"
+)]
 pub async fn decline_noun(
     State(_state): State<AppState>,
     Path(noun_id): Path<Uuid>,

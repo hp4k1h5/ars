@@ -3,7 +3,6 @@ use crate::schema::latin_prepositions::{self};
 use crate::schema::sql_types::GrammaticalCase;
 
 use diesel::prelude::*;
-use serde::Deserialize;
 use uuid::Uuid;
 
 impl diesel::deserialize::FromSql<diesel::sql_types::Nullable<GrammaticalCase>, diesel::pg::Pg>
@@ -26,21 +25,22 @@ impl diesel::deserialize::FromSql<diesel::sql_types::Nullable<GrammaticalCase>, 
     }
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, Queryable, Selectable)]
+#[derive(
+    Debug,
+    serde::Serialize,
+    serde::Deserialize,
+    Clone,
+    Queryable,
+    Selectable,
+    Insertable,
+    utoipa::ToSchema,
+)]
 #[diesel(table_name = latin_prepositions)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-#[diesel(treat_none_as_default_value = false)]
 pub struct Preposition {
     #[diesel(deserialize_as = Uuid)]
+    #[serde(default)]
     pub id: Option<Uuid>,
-    pub word: String,
-    pub cases: Vec<Case>,
-}
-
-/// Owned version for deserialization
-#[derive(Insertable, Debug, Deserialize)]
-#[diesel(table_name = latin_prepositions)]
-pub struct NewPreposition {
     pub word: String,
     pub cases: Vec<Case>,
 }

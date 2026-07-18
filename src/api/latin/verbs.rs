@@ -23,15 +23,35 @@ use uuid::Uuid;
 /// Search for verbs via a principal part
 /// as query_param ?principal_part=verb
 /// ex: ?supine=actum
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, utoipa::IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct VerbQuery {
+    /// Filter by present form (accent-insensitive)
     present: Option<String>,
+    /// Filter by infinitive form (accent-insensitive)
     infinitive: Option<String>,
+    /// Filter by perfect form (accent-insensitive)
     perfect: Option<String>,
+    /// Filter by supine form (accent-insensitive)
     supine: Option<String>,
+    /// Maximum number of results (default 10)
     limit: Option<i64>,
 }
 
+/// Search Latin verbs
+///
+/// Filters by the first provided principal part (present, infinitive,
+/// perfect, or supine; accent-insensitive).
+#[utoipa::path(
+    get,
+    path = "/latin/verbs",
+    params(VerbQuery),
+    responses(
+        (status = 200, description = "List of matching verbs", body = [Verb]),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "latin"
+)]
 pub async fn search_verbs(
     State(_state): State<AppState>,
     Query(params): Query<VerbQuery>,
@@ -61,17 +81,24 @@ pub async fn search_verbs(
     Ok(Json(verbs))
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, utoipa::IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct ConjugationQuery {
+    /// Person: first, second, or third
     person: Option<String>,
+    /// Number: singular or plural
     number: Option<String>,
+    /// Tense: present, imperfect, future, perfect, pluperfect, or futureperfect
     tense: Option<String>,
+    /// Mood: indicative or subjunctive
     mood: Option<String>,
+    /// Voice: active or passive
     voice: Option<String>,
+    /// Also generate infinitive forms
     infinitive: Option<bool>,
 }
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize, utoipa::ToSchema)]
 pub struct ConjugationResult {
     person: Option<String>,
     number: Option<String>,
@@ -122,6 +149,24 @@ pub fn infinitive_verb(verb: &Verb, params: &ConjugationQuery) -> Vec<Conjugatio
     results
 }
 
+/// Conjugate a verb
+///
+/// Returns the requested person/number/tense/mood/voice combinations for
+/// the verb, defaulting to the full paradigm.
+#[utoipa::path(
+    get,
+    path = "/latin/verbs/{verb}/conjugate",
+    params(
+        ("verb" = Uuid, Path, description = "Verb ID"),
+        ConjugationQuery
+    ),
+    responses(
+        (status = 200, description = "Conjugated forms", body = [ConjugationResult]),
+        (status = 400, description = "Invalid person, number, or mood parameter"),
+        (status = 404, description = "Verb not found")
+    ),
+    tag = "latin"
+)]
 pub async fn conjugate_verb(
     State(_state): State<AppState>,
     Path(verb_id): Path<Uuid>,
