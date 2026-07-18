@@ -13,7 +13,7 @@ Initially, this is an experiment in Rust and Latin.
 
 🦀 I'm not a native rustacean, so advice is welcome on rust implementation details and architecture, and large-scale rewrites may be considered, especially in the early stages of this project.
 
-An important aspect of this effort will be an emphasis on efficient and abstract language comprehension and production.
+The initial emphasis is on efficient and abstract language comprehension and production.
 
 ### Computational Linguistics
 
@@ -25,7 +25,9 @@ Eventually, there will be a database of lexical items for other languages, but t
 
 ## API
 
-This tool will deploy an api to a minimal instance in the cloud. There is a separate terraform repository for deployment.
+An experimental api is served from a minimal instance in the cloud. There is a separate terraform repository for deployment.
+
+Try visiting [http://api.ars.wiki/latin/verbs/8ac13640-5e53-428f-a4e6-6cb18a64a85b/conjugate](http://api.ars.wiki/latin/verbs/8ac13640-5e53-428f-a4e6-6cb18a64a85b/conjugate).
 
 ## Ars server
 

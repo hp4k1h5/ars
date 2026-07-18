@@ -44,7 +44,7 @@ async fn main() {
     let app = Router::new()
         .route("/", get(root))
         .route("/health", get(health))
-        .route("/latin/{word}", get(lookup_word))
+        .route("/latin/query/{word}", get(lookup_word))
         .merge(nouns_routes)
         .merge(verbs_routes)
         .merge(prepositions_routes)
