@@ -29,6 +29,10 @@ An experimental api is served from a minimal instance in the cloud. There is a s
 
 Try visiting [http://api.ars.wiki/latin/verbs/8ac13640-5e53-428f-a4e6-6cb18a64a85b/conjugate](http://api.ars.wiki/latin/verbs/8ac13640-5e53-428f-a4e6-6cb18a64a85b/conjugate) or [http://api.ars.wiki/latin/query/ambulo](http://api.ars.wiki/latin/query/ambulo).
 
+### API Docs
+
+Available from [https://hp4k1h5.github.io/ars/](https://hp4k1h5.github.io/ars/)
+
 ## Ars server
 
 ### environment variables
