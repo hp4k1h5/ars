@@ -9,7 +9,8 @@ use ars::api::{
     middleware::log_requests,
     openapi::ApiDoc,
 };
-use axum::{Router, middleware, routing::get};
+use axum::{Router, http::Method, middleware, routing::get};
+use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -43,6 +44,12 @@ async fn main() {
         get(search_prepositions),
     );
 
+    // Read-only public API: allow cross-origin GET so the GitHub Pages docs
+    // UI can issue try-it-out requests against api.ars.wiki.
+    let cors = CorsLayer::new()
+        .allow_methods([Method::GET])
+        .allow_origin(Any);
+
     let app = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/", get(root))
@@ -52,6 +59,7 @@ async fn main() {
         .merge(verbs_routes)
         .merge(prepositions_routes)
         .layer(middleware::from_fn(log_requests))
+        .layer(cors)
         .with_state(AppState {});
 
     let addr = format!("0.0.0.0:{}", port);
