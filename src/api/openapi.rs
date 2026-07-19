@@ -14,7 +14,7 @@ use crate::grammar::latin::verb::Verb;
         version = "0.1.0",
         description = "Latin language API: dictionary lookup, noun declension, verb conjugation, and preposition government."
     ),
-    servers((url = "https://api.ars.wiki", description = "production")),
+    servers((url = "http://api.ars.wiki", description = "production")),
     paths(
         crate::api::app::root,
         crate::api::app::health,
@@ -68,7 +68,7 @@ mod tests {
         }
 
         assert!(
-            json.contains("\"url\":\"https://api.ars.wiki\""),
+            json.contains("\"url\":\"http://api.ars.wiki\""),
             "missing production server in OpenAPI doc"
         );
     }
