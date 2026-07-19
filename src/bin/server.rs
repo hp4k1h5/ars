@@ -16,21 +16,43 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 const DEFAULT_PORT: u16 = 7357;
+const DEFAULT_TLS_PORT: u16 = 443;
 
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt().json().with_target(false).init();
+    let _ = rustls::crypto::ring::default_provider().install_default();
 
-    let args: Vec<String> = std::env::args().collect();
-    let port = if args.len() > 1 {
-        args[1].parse::<u16>().unwrap_or_else(|_| {
+    let port_arg = std::env::args().nth(1).map(|arg| {
+        arg.parse::<u16>().unwrap_or_else(|_| {
             tracing::error!("Invalid port number, using default {}", DEFAULT_PORT);
             DEFAULT_PORT
         })
-    } else {
-        DEFAULT_PORT
-    };
+    });
 
+    let app = build_app();
+
+    match ars::tls::TlsConfig::from_env() {
+        Some(cfg) => {
+            let port = port_arg.unwrap_or(DEFAULT_TLS_PORT);
+            info!(domain = %cfg.domain, "TLS enabled");
+            ars::tls::run(app, port, cfg).await.unwrap();
+        }
+        None => {
+            let port = port_arg.unwrap_or(DEFAULT_PORT);
+            let addr = format!("0.0.0.0:{}", port);
+            let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
+
+            info!("Server listening on {}", listener.local_addr().unwrap());
+
+            axum::serve(listener, app.into_make_service())
+                .await
+                .unwrap();
+        }
+    }
+}
+
+fn build_app() -> Router {
     let nouns_routes = Router::new()
         .route("/latin/nouns", get(search_nouns))
         .route("/latin/nouns/{noun}/decline", get(decline_noun));
@@ -50,7 +72,7 @@ async fn main() {
         .allow_methods([Method::GET])
         .allow_origin(Any);
 
-    let app = Router::new()
+    Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/", get(root))
         .route("/health", get(health))
@@ -60,14 +82,5 @@ async fn main() {
         .merge(prepositions_routes)
         .layer(middleware::from_fn(log_requests))
         .layer(cors)
-        .with_state(AppState {});
-
-    let addr = format!("0.0.0.0:{}", port);
-    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
-
-    info!("Server listening on {}", listener.local_addr().unwrap());
-
-    axum::serve(listener, app.into_make_service())
-        .await
-        .unwrap();
+        .with_state(AppState {})
 }

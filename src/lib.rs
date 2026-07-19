@@ -5,6 +5,7 @@ pub mod api;
 pub mod grammar;
 pub mod schema;
 pub mod syntax;
+pub mod tls;
 
 pub fn establish_cnx() -> PgConnection {
     let env_type = env::var("ARS_ENV").unwrap_or_else(|_| "dev".to_string());
