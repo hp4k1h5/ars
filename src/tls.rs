@@ -22,7 +22,7 @@ use axum::{Router, routing::get};
 use axum_server::tls_rustls::RustlsConfig;
 use instant_acme::{
     Account, AccountCredentials, AuthorizationStatus, ChallengeType, Identifier, LetsEncrypt,
-    NewAccount, NewOrder, OrderStatus,
+    NewAccount, NewOrder, Order, OrderStatus,
 };
 use tokio::time::sleep;
 use tracing::{error, info};
@@ -164,46 +164,35 @@ async fn acme_issue(
     info!(domain = %cfg.domain, url = directory.url(), "starting ACME order");
 
     let identifier = Identifier::Dns(cfg.domain.clone());
-    let mut order = account
-        .new_order(&NewOrder {
-            identifiers: &[identifier],
-        })
-        .await?;
+    let mut order = account.new_order(&NewOrder::new(&[identifier])).await?;
 
-    let result = complete_order(cfg, &mut order, store).await;
+    let result = complete_order(&mut order, store).await;
     store.write().unwrap().clear();
     result
 }
 
 async fn complete_order(
-    cfg: &TlsConfig,
-    order: &mut instant_acme::Order,
+    order: &mut Order,
     store: &ChallengeStore,
 ) -> Result<(String, String), Box<dyn Error + Send + Sync>> {
-    let authorizations = order.authorizations().await?;
-    let mut ready = Vec::new();
-    for authz in &authorizations {
+    let mut authorizations = order.authorizations();
+    while let Some(result) = authorizations.next().await {
+        let mut authz = result?;
         match authz.status {
             AuthorizationStatus::Pending => {}
             AuthorizationStatus::Valid => continue,
             status => return Err(format!("authorization not usable: {status:?}").into()),
         }
-        let challenge = authz
-            .challenges
-            .iter()
-            .find(|c| c.r#type == ChallengeType::Http01)
+        let mut challenge = authz
+            .challenge(ChallengeType::Http01)
             .ok_or("no http-01 challenge offered")?;
-        let key_auth = order.key_authorization(challenge).as_str().to_string();
-        store
-            .write()
-            .unwrap()
-            .insert(challenge.token.clone(), key_auth);
-        ready.push(challenge.url.clone());
+        store.write().unwrap().insert(
+            challenge.token.clone(),
+            challenge.key_authorization().as_str().to_string(),
+        );
+        challenge.set_ready().await?;
     }
-
-    for url in &ready {
-        order.set_challenge_ready(url).await?;
-    }
+    drop(authorizations);
 
     // Exponentially back off until the order becomes ready or invalid.
     let mut tries = 1u8;
@@ -224,12 +213,7 @@ async fn complete_order(
         return Err(format!("unexpected order status: {:?}", order.state().status).into());
     }
 
-    let mut params = rcgen::CertificateParams::new(vec![cfg.domain.clone()])?;
-    params.distinguished_name = rcgen::DistinguishedName::new();
-    let key_pair = rcgen::KeyPair::generate()?;
-    let csr = params.serialize_request(&key_pair)?;
-
-    order.finalize(csr.der()).await?;
+    let private_key_pem = order.finalize().await?;
     let mut tries = 0u8;
     let cert_chain_pem = loop {
         match order.certificate().await? {
@@ -241,7 +225,7 @@ async fn complete_order(
             None => return Err("certificate still processing after 30s".into()),
         }
     };
-    Ok((cert_chain_pem, key_pair.serialize_pem()))
+    Ok((cert_chain_pem, private_key_pem))
 }
 
 /// Load the ACME account from disk, or create and persist a new one.
@@ -255,7 +239,7 @@ async fn acme_account(cfg: &TlsConfig) -> Result<Account, Box<dyn Error + Send +
     if let Ok(contents) = std::fs::read_to_string(&path) {
         match serde_json::from_str::<AccountCredentials>(&contents) {
             Ok(credentials) => {
-                if let Ok(account) = Account::from_credentials(credentials).await {
+                if let Ok(account) = Account::builder()?.from_credentials(credentials).await {
                     return Ok(account);
                 }
             }
@@ -272,16 +256,17 @@ async fn acme_account(cfg: &TlsConfig) -> Result<Account, Box<dyn Error + Send +
         })
         .unwrap_or_default();
     let contact_refs: Vec<&str> = contact.iter().map(String::as_str).collect();
-    let (account, credentials) = Account::create(
-        &NewAccount {
-            contact: &contact_refs,
-            terms_of_service_agreed: true,
-            only_return_existing: false,
-        },
-        directory.url(),
-        None,
-    )
-    .await?;
+    let (account, credentials) = Account::builder()?
+        .create(
+            &NewAccount {
+                contact: &contact_refs,
+                terms_of_service_agreed: true,
+                only_return_existing: false,
+            },
+            directory.url().to_string(),
+            None,
+        )
+        .await?;
     std::fs::write(&path, serde_json::to_string_pretty(&credentials)?)?;
     Ok(account)
 }

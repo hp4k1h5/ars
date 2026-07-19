@@ -24,6 +24,11 @@ RUN cargo build --release --bin server
 # -------------------------------
 FROM debian:bullseye-slim AS runtime
 
+# Root CA bundle so the ACME client can reach Let's Encrypt over HTTPS
+RUN apt-get update \
+   && apt-get install -y --no-install-recommends ca-certificates \
+   && rm -rf /var/lib/apt/lists/*
+
 ARG ARS_ENV \
    DATABASE_URL
 ENV PORT=7357 \
