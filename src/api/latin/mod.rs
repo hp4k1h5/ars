@@ -91,8 +91,9 @@ pub fn lookup_word_cnx(
     word: &str,
     limit: i64,
 ) -> Result<Vec<WordResult>, diesel::result::Error> {
+    // latin_lookup.form is stored unaccented; a plain btree index serves this
     let lookups: Vec<(Uuid, Uuid, String, i32)> = latin_lookup::table
-        .filter(unaccent(latin_lookup::form).eq(unaccent(word)))
+        .filter(latin_lookup::form.eq(unaccent(word)))
         .limit(limit)
         .select((
             latin_lookup::id,

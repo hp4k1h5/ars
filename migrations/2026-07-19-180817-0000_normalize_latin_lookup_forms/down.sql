@@ -1,0 +1,1 @@
+-- irreversible: stripped accents cannot be restored

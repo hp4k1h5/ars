@@ -9,8 +9,10 @@ use ars::grammar::latin::preposition::Preposition;
 use ars::grammar::latin::verb::{Mood, Person, Tense, Verb, VerbInstance, Voice};
 use ars::schema::{latin_adjectives, latin_lookup, latin_nouns, latin_prepositions, latin_verbs};
 use diesel::prelude::*;
+use std::collections::HashSet;
 use std::error::Error;
 use strum::IntoEnumIterator;
+use unaccent::unaccent;
 use uuid::Uuid;
 
 #[derive(Insertable, Debug)]
@@ -36,6 +38,20 @@ fn insert_lookups(
     cnx: &mut PgConnection,
     entries: Vec<NewLookupEntry>,
 ) -> Result<(), Box<dyn Error>> {
+    // latin_lookup.form stores unaccented forms only; unaccenting can
+    // collapse distinct accented forms into duplicates, so dedupe on the
+    // (word, form, path) unique key before writing.
+    let mut seen = HashSet::new();
+    let entries: Vec<NewLookupEntry> = entries
+        .into_iter()
+        .map(|entry| NewLookupEntry {
+            word: entry.word,
+            form: unaccent(&entry.form),
+            path: entry.path,
+        })
+        .filter(|entry| seen.insert((entry.word, entry.form.clone(), entry.path)))
+        .collect();
+
     tracing::info!("Inserting {} entries", entries.len());
     diesel::insert_into(latin_lookup::table)
         .values(entries)
