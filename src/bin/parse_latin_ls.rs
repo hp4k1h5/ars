@@ -549,7 +549,7 @@ fn decl_from_ending(ending: &str) -> Option<String> {
     let d = match e.as_str() {
         "ae" => "I",
         "ī" | "i" => "II",
-        "is" | "inis" => "III",
+        "is" | "inis" | "ium" => "III",
         "ūs" | "us" => "IV",
         "ēī" | "ei" | "eī" => "V",
         _ => {
@@ -576,46 +576,160 @@ fn build_genitive_form(nom: &str, end: &str, decl: &str) -> String {
     if end.is_empty() {
         return nom.to_string();
     }
-    let e_stripped = ending_stripped(end);
     let stem: String = match decl {
-        "I" => nom.strip_suffix('a').unwrap_or(nom).to_string(),
-        "II" => nom
-            .strip_suffix("us")
-            .or_else(|| nom.strip_suffix("um"))
-            .unwrap_or(nom)
-            .to_string(),
-        "III" => {
-            // If nominative already ends with the genitive ending, gen = nom.
-            if nom.to_lowercase().ends_with(&e_stripped) {
-                return nom.to_string();
+        "I" => {
+            // Detect full genitive: e.g. "aedēs" + "aedium" → "aedium".
+            let nom_nfc = nfc(nom);
+            let itype_nfc = nfc(end);
+            let nom_first2: String = nom_nfc.chars().take(2).map(demacron).collect();
+            let itype_first2: String = itype_nfc.chars().take(2).map(demacron).collect();
+            if nom_nfc.len() >= 2 && itype_nfc.len() >= 2 && nom_first2 == itype_first2 {
+                return end.to_string();
             }
-            // Character‑based stem extraction for 3rd declension.
-            let s = nom;
-            let chs: Vec<char> = s.chars().collect();
+            nom.strip_suffix('a')
+                .or_else(|| nom.strip_suffix("ēs"))
+                .or_else(|| nom.strip_suffix("ās"))
+                .unwrap_or(nom)
+                .to_string()
+        }
+        "II" => {
+            let nom_nfc = nfc(nom);
+            let itype_nfc = nfc(end);
+            let nom_first2: String = nom_nfc.chars().take(2).map(demacron).collect();
+            let itype_first2: String = itype_nfc.chars().take(2).map(demacron).collect();
+            if nom_nfc.len() >= 2 && itype_nfc.len() >= 2 && nom_first2 == itype_first2 {
+                return end.to_string();
+            }
+            nom.strip_suffix("us")
+                .or_else(|| nom.strip_suffix("um"))
+                .or_else(|| nom.strip_suffix("os"))
+                .or_else(|| nom.strip_suffix("on"))
+                .or_else(|| nom.strip_suffix("is"))
+                .unwrap_or(nom)
+                .to_string()
+        }
+        "III" => {
+            // Detect whether itype is the full genitive form (e.g. "vōcis"
+            // for "vōx") or just a suffix (e.g. "ōris" for "āctor").
+            // Full genitive: itype shares the first 2 chars of the nominative
+            // (after demacron).  Suffix: itype starts with different chars.
+            let nom_nfc = nfc(nom);
+            let itype_nfc = nfc(end);
+            let nom_first2: String = nom_nfc.chars().take(2).map(demacron).collect();
+            let itype_first2: String = itype_nfc.chars().take(2).map(demacron).collect();
+            let is_full_genitive =
+                nom_nfc.len() >= 2 && itype_nfc.len() >= 2 && nom_first2 == itype_first2;
+            if is_full_genitive {
+                return end.to_string();
+            }
+
+            let itype_chars: Vec<char> = itype_nfc.chars().collect();
+            let itype_starts_with_vowel = itype_chars.first().map_or(false, |c| {
+                matches!(c, 'a' | 'e' | 'i' | 'o' | 'u' | 'ā' | 'ē' | 'ī' | 'ō' | 'ū')
+            });
+
+            // Strip the nominative ending to get the stem.
+            let chs: Vec<char> = nom_nfc.chars().collect();
             let n = chs.len();
             if n == 0 {
-                return s.to_string();
+                return nom_nfc;
             }
-            let last = chs[n - 1];
             let last2 = if n >= 2 {
                 format!("{}{}", chs[n - 2], chs[n - 1])
             } else {
                 String::new()
             };
-            let stem_chars: &[char] = if last2.ends_with("or")
+            let last = chs[n - 1];
+
+            let (stem_chars, stripped_len) = if last2.ends_with("or")
                 || last2.ends_with("ōr")
+                || last2.ends_with("er")
+                || last2.ends_with("en")
+                || last2.ends_with("ōn")
                 || last2.ends_with("ēs")
+                || last2.ends_with("es")
                 || last2.ends_with("ās")
+                || last2.ends_with("as")
                 || last2.ends_with("ūs")
+                || last2.ends_with("us")
                 || last2.ends_with("is")
+                || last2.ends_with("ns")
+                || last2.ends_with("ut")
+                || last2.ends_with("ur")
             {
-                &chs[..n - 2]
-            } else if last == 'ō' || last == 'ē' || last == 'ā' || last == 's' || last == 'x' {
-                &chs[..n - 1]
+                (&chs[..n - 2], 2)
+            } else if last == 'ō'
+                || last == 'ē'
+                || last == 'ā'
+                || last == 'o'
+                || last == 'e'
+                || last == 'a'
+                || last == 's'
+                || last == 'x'
+                || last == 'n'
+            {
+                (&chs[..n - 1], 1)
             } else {
-                &chs[..]
+                (&chs[..], 0)
             };
-            stem_chars.iter().collect()
+
+            let stem: String = stem_chars.iter().collect();
+
+            if itype_starts_with_vowel && itype_chars.len() >= 2 && stripped_len > 0 {
+                // The itype encodes stem_vowel + stem_consonant + suffix.
+                // E.g. "īnis" → stem vowel "ī" + stem consonant "n" + suffix "is".
+                let stem = if stripped_len == 1 {
+                    let nom_vowel = chs[n - 1];
+                    let stem_cons = itype_chars[1];
+                    let stripped_str: String = stem_chars.iter().collect();
+                    format!("{stripped_str}{nom_vowel}{stem_cons}")
+                } else {
+                    let itype_stem: String = itype_chars[..2].iter().collect();
+                    let stripped_str: String = stem_chars.iter().collect();
+                    format!("{stripped_str}{itype_stem}")
+                };
+                let suffix: String = itype_chars[2..].iter().collect();
+                return format!("{stem}{suffix}");
+            }
+
+            // Consonant-starting suffix: use the stripped stem.
+            // If no overlap with the stripped stem, try the full nominative
+            // (for Greek forms like "Acherōn" where the ending is part of stem).
+            let stem_chars_vec: Vec<char> = stem.chars().collect();
+            let mut overlap = 0usize;
+            for i in (1..=stem_chars_vec.len().min(itype_chars.len())).rev() {
+                let stem_suffix: Vec<char> = stem_chars_vec[stem_chars_vec.len() - i..]
+                    .iter()
+                    .map(|c| demacron(*c))
+                    .collect();
+                let itype_prefix: Vec<char> =
+                    itype_chars[..i].iter().map(|c| demacron(*c)).collect();
+                if stem_suffix == itype_prefix {
+                    overlap = i;
+                    break;
+                }
+            }
+            if overlap > 0 {
+                let suffix: String = itype_chars[overlap..].iter().collect();
+                return format!("{stem}{suffix}");
+            }
+            // Fall back to full nominative for Greek loans.
+            let nom_chars: Vec<char> = nom_nfc.chars().collect();
+            let mut nom_overlap = 0usize;
+            for i in (1..=nom_chars.len().min(itype_chars.len())).rev() {
+                let nom_suffix: Vec<char> = nom_chars[nom_chars.len() - i..]
+                    .iter()
+                    .map(|c| demacron(*c))
+                    .collect();
+                let itype_prefix: Vec<char> =
+                    itype_chars[..i].iter().map(|c| demacron(*c)).collect();
+                if nom_suffix == itype_prefix {
+                    nom_overlap = i;
+                    break;
+                }
+            }
+            let suffix: String = itype_chars[nom_overlap..].iter().collect();
+            return format!("{nom_nfc}{suffix}");
         }
         "IV" => nom.strip_suffix("us").unwrap_or(nom).to_string(),
         "V" => nom.strip_suffix("es").unwrap_or(nom).to_string(),

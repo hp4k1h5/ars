@@ -55,6 +55,7 @@ fn insert_lookups(
     tracing::info!("Inserting {} entries", entries.len());
     diesel::insert_into(latin_lookup::table)
         .values(entries)
+        .on_conflict_do_nothing()
         .execute(cnx)?;
     Ok(())
 }

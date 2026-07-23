@@ -27,7 +27,7 @@ Eventually, there will be a database of lexical items for other languages, but t
 
 An experimental api is served from a minimal instance in the cloud. There is a separate terraform repository for deployment.
 
-Try visiting [http://api.ars.wiki/latin/verbs/8ac13640-5e53-428f-a4e6-6cb18a64a85b/conjugate](http://api.ars.wiki/latin/verbs/8ac13640-5e53-428f-a4e6-6cb18a64a85b/conjugate) or [http://api.ars.wiki/latin/query/ambulo](http://api.ars.wiki/latin/query/ambulo).
+Try visiting [http://api.ars.wiki/latin/query/ambulo](http://api.ars.wiki/latin/query/ambulo).
 
 ### API Docs
 

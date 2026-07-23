@@ -193,11 +193,11 @@ impl VerbInstance<'_> {
             },
         };
 
-        principal_part
-            .clone()
-            .chars()
-            .take(principal_part.chars().count() - ch)
-            .collect()
+        let len = principal_part.chars().count();
+        if len == 0 || len <= ch {
+            return principal_part.clone();
+        }
+        principal_part.clone().chars().take(len - ch).collect()
     }
 
     pub fn handle_supine(&self) -> String {
@@ -207,10 +207,11 @@ impl VerbInstance<'_> {
             .as_ref()
             .filter(|s| !s.is_empty())
             .unwrap_or(&self.verb.perfect);
-        if verb.is_empty() {
+        let vlen = verb.chars().count();
+        if vlen < 2 {
             return verb.to_string();
         }
-        let stem: String = verb.chars().take(verb.chars().count() - 2).collect();
+        let stem: String = verb.chars().take(vlen - 2).collect();
 
         let adjective = Adjective {
             id: None,
@@ -449,22 +450,25 @@ impl VerbInstance<'_> {
             Tense::Present => match self.voice {
                 Voice::Active => self.verb.infinitive.clone(),
                 Voice::Passive => {
+                    let ilen = self.verb.infinitive.chars().count();
+                    if ilen == 0 {
+                        return "".to_string();
+                    }
                     self.verb
                         .infinitive
                         .chars()
-                        .take(self.verb.infinitive.chars().count() - 1)
+                        .take(ilen - 1)
                         .collect::<String>()
                         + "ī"
                 }
             },
             Tense::Perfect => match self.voice {
                 Voice::Active => {
-                    self.verb
-                        .perfect
-                        .chars()
-                        .take(self.verb.perfect.chars().count() - 1)
-                        .collect::<String>()
-                        + "isse"
+                    let plen = self.verb.perfect.chars().count();
+                    if plen == 0 {
+                        return "isse".to_string();
+                    }
+                    self.verb.perfect.chars().take(plen - 1).collect::<String>() + "isse"
                 }
                 Voice::Passive => format!(
                     "{} esse",
